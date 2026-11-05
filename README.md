@@ -1,3 +1,1 @@
-# H1 INFINITE LOVE
-test2
-test3 ok
+# H1 INFINITE LOVE - Phase 02 Done
