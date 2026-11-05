@@ -1,0 +1,21 @@
+{
+  "fade_in_sec": 0.3,
+  "fade_out_sec": 0.3,
+  "upper_body_override": [
+    "talking",
+    "hand-gestures",
+    "eating",
+    "drinking"
+  ],
+  "lower_body_override": [
+    "walking",
+    "running",
+    "sitting"
+  ],
+  "rules": [
+    "Talking can blend with sitting/standing/walking upper body",
+    "Laughing overrides talking for 2.5 sec then returns to previous",
+    "Sleeping cannot blend with walking/running",
+    "Idle is default fallback when clip missing"
+  ]
+}
