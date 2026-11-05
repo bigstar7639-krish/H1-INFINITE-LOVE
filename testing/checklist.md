@@ -1,0 +1,14 @@
+# Pre-Release Checklist - Phase 18
+- [ ] No fake buttons - every button does something OR says "Coming soon"
+- [ ] No fake features claimed as working
+- [ ] No passwords / OTP / bank saved anywhere
+- [ ] No token / API key in repo (check git history!)
+- [ ] .github/workflows/android-build.yml at correct path
+- [ ] AndroidManifest permissions only needed ones
+- [ ] Floating: Permission check before show
+- [ ] Assistant: Confirm before call/delete
+- [ ] Website: Chat works, worlds switch
+- [ ] Privacy Policy present
+- [ ] README updated
+- [ ] Version bumped in build.gradle
+- [ ] Tested on real phone (not only emulator)
