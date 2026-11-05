@@ -1,0 +1,66 @@
+{
+  "character": "Aira H1",
+  "phase": "04",
+  "total_bones": 55,
+  "root": "Root",
+  "spine": [
+    "Hips",
+    "Spine",
+    "Chest",
+    "Neck",
+    "Head"
+  ],
+  "arms": {
+    "left": [
+      "Shoulder_L",
+      "UpperArm_L",
+      "Forearm_L",
+      "Hand_L"
+    ],
+    "right": [
+      "Shoulder_R",
+      "UpperArm_R",
+      "Forearm_R",
+      "Hand_R"
+    ]
+  },
+  "legs": {
+    "left": [
+      "Thigh_L",
+      "Shin_L",
+      "Foot_L",
+      "Toe_L"
+    ],
+    "right": [
+      "Thigh_R",
+      "Shin_R",
+      "Foot_R",
+      "Toe_R"
+    ]
+  },
+  "hair_bones": [
+    "Hair_Front_L",
+    "Hair_Front_R",
+    "Hair_Tail_L1",
+    "Hair_Tail_L2",
+    "Hair_Tail_R1",
+    "Hair_Tail_R2"
+  ],
+  "eye_bones": [
+    "Eye_L",
+    "Eye_R"
+  ],
+  "cloth_bones": [
+    "Skirt_F",
+    "Skirt_B",
+    "Skirt_L",
+    "Skirt_R",
+    "Hoodie_L",
+    "Hoodie_R"
+  ],
+  "weight_rules": {
+    "max_influences_per_vertex": 4,
+    "head": "100% Head bone"
+  },
+  "status": "SPEC ONLY - build in Blender"
+}
