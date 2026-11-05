@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude sensitive memory and encryption keys from auto backup -->
+    <exclude domain="sharedpref" path="h1_secure_prefs.xml"/>
+    <exclude domain="database" path="h1_memory.db"/>
+</full-backup-content>

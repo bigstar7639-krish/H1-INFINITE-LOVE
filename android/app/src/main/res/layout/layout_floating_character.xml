@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder floating character view.
+     Will be replaced by real 3D / animated character surface in later phases. -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="96dp"
+    android:layout_height="128dp"
+    android:background="@drawable/bg_floating_character"
+    android:elevation="8dp"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/ivCharacter"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_character_placeholder"
+        android:contentDescription="H1 Companion" />
+
+</FrameLayout>

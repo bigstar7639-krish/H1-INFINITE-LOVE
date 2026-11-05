@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">H1 Infinite Love</string>
+    <string name="companion_notification_title">H1 Infinite Love</string>
+    <string name="companion_notification_text">Your companion is active</string>
+    <string name="overlay_permission_required">Overlay permission is required for the floating character</string>
+</resources>
