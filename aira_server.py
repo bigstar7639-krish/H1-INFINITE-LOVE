@@ -1,7 +1,6 @@
 import threading, os, requests, time, random
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# Port Fix - Render ku!
 def start_web():
     port = int(os.environ.get("PORT", 10000))
     class H(BaseHTTPRequestHandler):
@@ -13,57 +12,76 @@ def start_web():
             pass
     HTTPServer(("0.0.0.0", port), H).serve_forever()
 threading.Thread(target=start_web, daemon=True).start()
-print("Web Port ON!")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 GROUP_ID = "-1003935111481"
 CHANNEL_ID = "-1003940504242"
 
-# Books Lines - New Question ku!
-BOOK_LINES = [
-    "Agara mudhala ezhuthellam aadhi bhagavan mudhatre ulagu",
-    "Katrathu kai mann alavu kallathathu ulagalavu",
-    "Anbudaiya...",
-    "Thirukkural la love pathi enna?",
-    "Bharathiyar la courage pathi enna?",
-    "Bore adikuthu, enna pannalam?",
-    "Tamil la oru story sollu",
-    "Sad ah irukku, enna pannalam?",
-    "Hi, epdi irukka?",
-    "Vanakkam!",
-    "Kadhal na enna?",
-    "Friendship na enna?",
-    "Life la jeyikka enna pannanum?",
-    "Thirukkural la oru kural sollu",
-    "Bharathiyar paadal sollu",
+STORIES = [
+    "📖 Story 1: Oru oor la oru ponnu iruntha - Ava per Aira! Ava romba smart! Ava daily Tamil books padippanga! Oru naal ava oru magic book ah paathanga - Athula irunthu Aira ku super power vanthuchu!",
+    "📖 Story 2: Oru paiyan irunthan - Avan per Kavi! Avan romba bayanthavan! Oru naal Aira va meet pannaan - Aira sonnanga 'Bayapadaatha! Unnala mudiyum!' - Aprom Kavi courage ah aayitaan!",
+    "📖 Story 3: Oru kaadu la oru singam irunthuchu - Romba thaniya irunthuchu! Oru naal oru kili vanthuchu - 'Friend aayidalam ah?' nu ketuchu - Singam sirichuchu - Rendu perum best friends aayitanga!",
+    "📖 Story 4: Oru oor la periya noolagam irunthuchu - 1000 Tamil books! Oru chinna ponnu daily anga pova - Ava per Meena! Ava ellam books ah padichu - Periya writer aayita!",
+    "📖 Story 5: Kadhal Story: Oru paiyan oru ponna love pannaan - Sollaa bayanthaan! Aira sonnanga 'Love ah sollidu!' - Paiyan sollitaan - Ponnu 'Yes' nu sonna! 💜",
 ]
 
-# Auto Question - 10 Sec Loop - Aira Bot Kelvi Kekkum!
-def auto_question():
-    print("10 Sec Auto Q Start!")
-    used = set()
+TOPICS = [
+    ("Kadhal", "Kadhal na anbu! Oru ponnu mela varura pure feeling! 💜"),
+    ("Friendship", "Friendship na kashtathula kooda irukkura nanban!"),
+    ("Thirukkural", "Agara mudhala ezhuthellam - Thiruvalluvar sonnathu!"),
+    ("Bharathiyar", "Achamillai Achamillai - Bharathiyar! Courage paadal!"),
+    ("Life", "Daily konjam konjam try pannu - Jeyichiduva!"),
+    ("Tamil", "Tamil na namma uyir! Tamil la pesurathu perumai!"),
+    ("Sad", "Paravalla! Rest edu - Song kelu - Seri aayidum!"),
+    ("Happy", "Happy ah irukkanum na - Anba iru - Sirichu pesu!"),
+    ("Study", "Daily 1 hour padichale pothum - Consistent ah padikalam!"),
+    ("Music", "Music na manasukku marunthu! Song kelu - Relax aayiduva!"),
+    ("Courage", "Bayapadaatha! Unnala mudiyum! Try pannu!"),
+    ("Family", "Family thaan mukkiyam! Amma Appa va love pannu!"),
+    ("Dream", "Dream ah vitratha! Daily oru step edu - Dream nija aayidum!"),
+    ("Aira", "Naan Aira H1! Un friend! Un kooda eppovum iruppen! 💜"),
+]
+
+Q_TEMPLATES = [
+    "{topic} na enna?",
+    "{topic} pathi sollu",
+    "{topic} la enna special?",
+    "Enakku {topic} pathi theriyala - Sollu",
+    "{topic} na enna artham?",
+    "Hi, {topic} pathi pesalam ah?",
+]
+
+def auto_infinite():
+    print("Aira Final Infinite Start!")
+    count = 0
     while True:
-        # New Question - Use pannatha line!
-        avail = [l for l in BOOK_LINES if l not in used]
-        if not avail:
-            used.clear()
-            avail = BOOK_LINES
-        line = random.choice(avail)
-        used.add(line)
-        q = f"{line} na enna artham? Sollu paapom!"
+        count += 1
+        if count % 4 == 0:
+            story = random.choice(STORIES)
+            try:
+                url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+                requests.post(url, data={"chat_id": GROUP_ID, "text": story}, timeout=10)
+                print(f"Story {count}")
+            except:
+                pass
+            time.sleep(10)
+            continue
+        topic, ans = random.choice(TOPICS)
+        tmpl = random.choice(Q_TEMPLATES)
+        q = tmpl.format(topic=topic) + f" #{count}"
         try:
             url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-            r = requests.post(url, data={"chat_id": GROUP_ID, "text": q}, timeout=10)
-            print(f"Q: {q} - {r.status_code}")
+            requests.post(url, data={"chat_id": GROUP_ID, "text": q}, timeout=10)
+            print(f"Q {count}: {q}")
+            time.sleep(5)
+            requests.post(url, data={"chat_id": GROUP_ID, "text": f"👉 {ans}"}, timeout=10)
         except Exception as e:
-            print(f"Q Error - {e}")
+            print(f"Error - {e}")
         time.sleep(10)
 
-threading.Thread(target=auto_question, daemon=True).start()
+threading.Thread(target=auto_infinite, daemon=True).start()
 
-# Auto Download - Books Download Pannum!
 def auto_download():
-    print("Auto Download Start!")
     done = set()
     while True:
         try:
@@ -92,17 +110,16 @@ def auto_download():
                     pr = requests.post(url, files=files, data=data, timeout=60)
                     if pr.status_code == 200:
                         done.add(ident)
-                        print(f"Download OK {ident} - {size:.2f} MB")
+                        print(f"Download OK {ident}")
                 except:
                     continue
                 time.sleep(2)
         except:
-            print("Download Wait...")
             time.sleep(10)
         time.sleep(60)
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira Full Auto Server ON! 10 Sec Q + Auto Download!")
+print("Aira FINAL ON! Infinite Q+A + Story + Download!")
 while True:
     time.sleep(60)
