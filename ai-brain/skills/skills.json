@@ -1,0 +1,33 @@
+{
+  "phase": "08",
+  "skills": [
+    {
+      "id": "general-knowledge",
+      "desc": "General knowledge, explain, summarize"
+    },
+    {
+      "id": "programming",
+      "desc": "Code help, debug, Kotlin, Python, JS"
+    },
+    {
+      "id": "mathematics",
+      "desc": "Math, calculation, step-by-step"
+    },
+    {
+      "id": "translation",
+      "desc": "Tamil <-> English <-> Hindi"
+    },
+    {
+      "id": "creative-writing",
+      "desc": "Story, poem, letter"
+    },
+    {
+      "id": "planning",
+      "desc": "Plans, schedules, tasks"
+    },
+    {
+      "id": "decision-support",
+      "desc": "Pros/cons, decision help"
+    }
+  ]
+}
