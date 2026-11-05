@@ -1,0 +1,12 @@
+{
+  "emotion": "crying",
+  "intensity": 0.0,
+  "face": {
+    "mouth_cry": 0.9,
+    "brow_sad": 0.9
+  },
+  "eyes": "teary, closed often",
+  "voice_tone": "trembling, soft",
+  "body": "head down, shoulders shake",
+  "status": "DEFINED - Phase 06"
+}

@@ -1,0 +1,12 @@
+{
+  "emotion": "boredom",
+  "intensity": 0.0,
+  "face": {
+    "mouth_pout": 0.5,
+    "brow_sad": 0.4
+  },
+  "eyes": "half-open",
+  "voice_tone": "flat",
+  "body": "sigh, lean on hand",
+  "status": "DEFINED - Phase 06"
+}

@@ -1,0 +1,12 @@
+{
+  "emotion": "embarrassment",
+  "intensity": 0.0,
+  "face": {
+    "cheek_blush": 1.0,
+    "shy_look_away": 0.7
+  },
+  "eyes": "look away",
+  "voice_tone": "nervous laugh",
+  "body": "cover face",
+  "status": "DEFINED - Phase 06"
+}

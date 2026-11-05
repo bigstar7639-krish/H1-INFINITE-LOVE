@@ -1,0 +1,12 @@
+{
+  "emotion": "surprise",
+  "intensity": 0.0,
+  "face": {
+    "brow_surprise": 1.0,
+    "mouth_open_big": 0.8
+  },
+  "eyes": "wide open",
+  "voice_tone": "high, quick",
+  "body": "lean forward",
+  "status": "DEFINED - Phase 06"
+}

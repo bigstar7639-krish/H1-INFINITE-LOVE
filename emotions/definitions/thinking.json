@@ -1,0 +1,11 @@
+{
+  "emotion": "thinking",
+  "intensity": 0.0,
+  "face": {
+    "brow_thinking": 0.9
+  },
+  "eyes": "look up",
+  "voice_tone": "slow, thoughtful",
+  "body": "hand on chin",
+  "status": "DEFINED - Phase 06"
+}

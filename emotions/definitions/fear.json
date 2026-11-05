@@ -1,0 +1,12 @@
+{
+  "emotion": "fear",
+  "intensity": 0.0,
+  "face": {
+    "brow_surprise": 0.8,
+    "mouth_open_small": 0.7
+  },
+  "eyes": "wide",
+  "voice_tone": "shaky",
+  "body": "step back, hands up",
+  "status": "DEFINED - Phase 06"
+}

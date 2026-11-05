@@ -1,0 +1,12 @@
+{
+  "emotion": "empathy",
+  "intensity": 0.0,
+  "face": {
+    "mouth_smile": 0.5,
+    "brow_sad": 0.5
+  },
+  "eyes": "soft, caring",
+  "voice_tone": "warm, caring",
+  "body": "lean in, nod",
+  "status": "DEFINED - Phase 06"
+}

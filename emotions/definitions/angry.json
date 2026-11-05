@@ -1,0 +1,12 @@
+{
+  "emotion": "angry",
+  "intensity": 0.0,
+  "face": {
+    "mouth_frown": 0.8,
+    "brow_angry": 0.9
+  },
+  "eyes": "narrowed",
+  "voice_tone": "firm, sharp",
+  "body": "tense, crossed arms",
+  "status": "DEFINED - Phase 06"
+}

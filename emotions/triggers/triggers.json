@@ -1,0 +1,45 @@
+{
+  "triggers": [
+    {
+      "keyword": "happy|super|great",
+      "emotion": "happy",
+      "intensity": 0.8
+    },
+    {
+      "keyword": "sad|miss|lonely",
+      "emotion": "sad",
+      "intensity": 0.7
+    },
+    {
+      "keyword": "funny|joke|lol",
+      "emotion": "laughing",
+      "intensity": 0.9
+    },
+    {
+      "keyword": "love|miss you",
+      "emotion": "love",
+      "intensity": 0.8
+    },
+    {
+      "keyword": "sorry",
+      "emotion": "empathy",
+      "intensity": 0.8
+    },
+    {
+      "keyword": "wow|really",
+      "emotion": "surprise",
+      "intensity": 0.7
+    },
+    {
+      "keyword": "sleep|tired",
+      "emotion": "sleepiness",
+      "intensity": 0.7
+    },
+    {
+      "keyword": "bored",
+      "emotion": "boredom",
+      "intensity": 0.6
+    }
+  ],
+  "note": "Keyword triggers are starting point. AI brain in Phase 08 will use context, not only keywords."
+}
