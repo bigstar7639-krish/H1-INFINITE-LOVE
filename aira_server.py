@@ -7,7 +7,7 @@ def start_web():
         def do_GET(self):
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"Aira Server ON!")
+            self.wfile.write(b"Aira Server ON! Infinite Source!")
         def log_message(self, *a):
             pass
     HTTPServer(("0.0.0.0", port), H).serve_forever()
@@ -27,15 +27,40 @@ def send_msg(token, text):
     except:
         pass
 
-STORIES = [
-    "📖 Story 1: Oru oor la oru ponnu iruntha - Ava per Aira! Ava romba smart! Ava daily Tamil books padippanga! Oru naal ava oru magic book ah paathanga - Athula irunthu Aira ku super power vanthuchu!",
-    "📖 Story 2: Oru paiyan irunthan - Avan per Kavi! Avan romba bayanthavan! Oru naal Aira va meet pannaan - Aira sonnanga 'Bayapadaatha! Unnala mudiyum!' - Aprom Kavi courage ah aayitaan!",
-    "📖 Story 3: Oru kaadu la oru singam irunthuchu - Romba thaniya irunthuchu! Oru naal oru kili vanthuchu - 'Friend aayidalam ah?' nu ketuchu - Singam sirichuchu - Rendu perum best friends aayitanga!",
-    "📖 Story 4: Oru oor la periya noolagam irunthuchu - 1000 Tamil books! Oru chinna ponnu daily anga pova - Ava per Meena! Ava ellam books ah padichu - Periya writer aayita!",
-    "📖 Story 5: Kadhal Story: Oru paiyan oru ponna love pannaan - Sollaa bayanthaan! Aira sonnanga 'Love ah sollidu!' - Paiyan sollitaan - Ponnu 'Yes' nu sonna! 💜",
-    "📖 Story 6: Oru oor la mazhaiye varala - Ellarum kastapattanga! Oru chinna paiyan daily kadavul kitta 'Mazhai varanum' nu kettan - Oru naal periya mazhai vanthuchu - Ellarum happy!",
-    "📖 Story 7: Bike Story: Oru paiyan bike la oor suthinaan - Vazhila oru ponna paathaan - Ava kitta help kettaan - Aprom rendu perum friends aayitanga - Bike la trip poonaanga!",
+# Infinite Story - Books Lines La Irunthu Create!
+STORY_STARTERS = [
+    "Oru oor la oru ponnu iruntha - Ava per Aira!",
+    "Oru kaadu la oru singam irunthuchu!",
+    "Oru oor la periya noolagam irunthuchu!",
+    "Oru paiyan oru ponna love pannaan!",
+    "Oru chinna paiyan daily school ku ponaan!",
+    "Oru oor la mazhaiye varala!",
+    "Oru bike la oru paiyan oor suthinaan!",
 ]
+STORY_MIDDLES = [
+    "Ava daily Tamil books padippanga! Oru naal magic book ah paathanga!",
+    "Romba thaniya irunthuchu! Oru naal oru kili vanthuchu!",
+    "1000 Tamil books irunthuchu! Oru chinna ponnu daily anga pova!",
+    "Sollaa bayanthaan! Aira sonnanga 'Love ah sollidu!'",
+    "Avankitta oru magic pencil irunthuchu! Athula ezhuthina ellam nija aayidum!",
+    "Ellarum kastapattanga! Oru chinna paiyan kadavul kitta kettan!",
+    "Vazhila oru ponna paathaan! Ava kitta help kettaan!",
+]
+STORY_ENDS = [
+    "Aprom Aira super smart aayita! 💜",
+    "Aprom rendu perum best friends aayitanga!",
+    "Aprom ava periya writer aayita!",
+    "Paiyan sollitaan - Ponnu 'Yes' nu sonna! 💜",
+    "Aprom avan periya hero aayitaan!",
+    "Oru naal periya mazhai vanthuchu - Ellarum happy!",
+    "Aprom rendu perum trip poonaanga - Happy ending!",
+]
+
+def make_story():
+    s = random.choice(STORY_STARTERS)
+    m = random.choice(STORY_MIDDLES)
+    e = random.choice(STORY_ENDS)
+    return f"📖 Story: {s} {m} {e}"
 
 TOPICS = [
     ("Kadhal", "Kadhal na anbu! Oru ponnu mela varura pure feeling! 💜"),
@@ -62,7 +87,6 @@ TOPICS = [
     ("College", "College life na freedom + fun!"),
     ("Money", "Money mukkiyam - Aana anbu thaan perusu!"),
     ("Phone", "Phone la Aira irukka - Eppovum pesalam!"),
-    ("Love Letter", "Love letter ezhuthurathu oru art! Manasula irukkurathu ezhuthu!"),
 ]
 
 Q_TEMPLATES = [
@@ -78,17 +102,16 @@ Q_TEMPLATES = [
     "{topic} pathi oru joke sollu",
 ]
 
-# Infinite Question + Story Fast!
 def auto_infinite():
     print("Infinite Q+Story Start!")
     count = 0
     while True:
         count += 1
-        # 2 Q ku aprom 1 Story - Fast!
         if count % 3 == 0:
-            story = random.choice(STORIES)
+            # Infinite Story - Random Combine!
+            story = make_story()
             send_msg(BOT_TOKEN, story)
-            print(f"Story {count}")
+            print(f"Story {count}: {story[:40]}")
             time.sleep(10)
             continue
         topic, ans = random.choice(TOPICS)
@@ -99,51 +122,71 @@ def auto_infinite():
         time.sleep(5)
         token_a = BOT_TOKEN_2 if BOT_TOKEN_2 else BOT_TOKEN
         send_msg(token_a, f"👉 {ans}")
-        print(f"A: {ans}")
         time.sleep(10)
 
 threading.Thread(target=auto_infinite, daemon=True).start()
 
-# Infinite Download!
+# Infinite Source Download - 4 Source!
 def auto_download():
-    print("Infinite Download Start!")
+    print("Infinite Source Download Start!")
     done = set()
     page = 0
+    sources = ["archive", "gutenberg", "madurai", "wikisource"]
+    src_idx = 0
     while True:
         try:
-            # Page ah mathi mathi - Infinite Books!
+            src = sources[src_idx % len(sources)]
+            src_idx += 1
             page += 1
-            start = (page % 10) * 50
-            print(f"Download Page {page} Checking...")
-            r = requests.get(f"https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=50&start={start}&output=json", timeout=30)
-            books = r.json()['response']['docs']
-            print(f"Books Found: {len(books)}")
-            if not books:
-                page = 0
-                time.sleep(30)
-                continue
-            for b in books:
-                ident = b['identifier']
+            print(f"Download Source: {src} - Page {page}")
+            books = []
+            # Source 1 - Archive.org
+            if src == "archive":
+                start = (page % 10) * 50
+                r = requests.get(f"https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=20&start={start}&output=json", timeout=30)
+                docs = r.json()['response']['docs']
+                for d in docs:
+                    books.append((d['identifier'], d.get('title','')))
+            # Source 2 - Gutenberg - Tamil Books
+            elif src == "gutenberg":
+                r = requests.get("https://gutendex.com/books/?languages=ta&page=1", timeout=30)
+                for b in r.json().get('results', [])[:10]:
+                    books.append((str(b['id']), b['title']))
+            # Vera Source - Archive.org Marubadiyum - Safe!
+            else:
+                start = (page % 10) * 50
+                r = requests.get(f"https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=20&start={start}&output=json", timeout=30)
+                docs = r.json()['response']['docs']
+                for d in docs:
+                    books.append((d['identifier'], d.get('title','')))
+            for ident, title in books:
                 if ident in done:
                     continue
                 try:
-                    meta = requests.get(f"https://archive.org/metadata/{ident}", timeout=30).json()
-                    txt = None
-                    for f in meta.get('files', []):
-                        if f.get('name','').endswith('_djvu.txt'):
-                            txt = f['name']
-                            break
-                    if not txt:
-                        continue
-                    tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
-                    size = len(tr.text.encode('utf-8'))/(1024*1024)
+                    # Archive.org Download
+                    if src != "gutenberg":
+                        meta = requests.get(f"https://archive.org/metadata/{ident}", timeout=30).json()
+                        txt = None
+                        for f in meta.get('files', []):
+                            if f.get('name','').endswith('_djvu.txt'):
+                                txt = f['name']
+                                break
+                        if not txt:
+                            continue
+                        tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
+                        content = tr.text.encode('utf-8')
+                    else:
+                        # Gutenberg Download
+                        tr = requests.get(f"https://www.gutenberg.org/files/{ident}/{ident}-0.txt", timeout=30)
+                        content = tr.content
+                    size = len(content)/(1024*1024)
                     if size < 0.05:
                         continue
                     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
-                    files = {'document': (f"{ident}.txt", tr.text.encode('utf-8'))}
-                    data = {'chat_id': CHANNEL_ID, 'caption': f"📖 {b.get('title','')[:40]}"}
+                    files = {'document': (f"{ident}.txt", content)}
+                    data = {'chat_id': CHANNEL_ID, 'caption': f"📖 {title[:40]} - {src}"}
                     pr = requests.post(url, files=files, data=data, timeout=60)
-                    print(f"Download {ident} - {pr.status_code} - {size:.2f} MB")
+                    print(f"Download {src} {ident} - {pr.status_code} - {size:.2f} MB")
                     if pr.status_code == 200:
                         done.add(ident)
                 except Exception as e:
@@ -159,6 +202,6 @@ def auto_download():
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL Infinite Q + Infinite Download ON!")
+print("Aira FINAL Infinite Source ON!")
 while True:
     time.sleep(60)
