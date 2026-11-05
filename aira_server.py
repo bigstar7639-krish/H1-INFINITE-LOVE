@@ -61,7 +61,6 @@ def auto_infinite():
             try:
                 url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
                 requests.post(url, data={"chat_id": GROUP_ID, "text": story}, timeout=10)
-                print(f"Story {count}")
             except:
                 pass
             time.sleep(10)
@@ -85,7 +84,7 @@ def auto_download():
     done = set()
     while True:
         try:
-            r = requests.get("https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=20&output=json", timeout=30)
+            r = requests.get("https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=50&output=json", timeout=30)
             books = r.json()['response']['docs']
             for b in books:
                 ident = b['identifier']
@@ -113,10 +112,10 @@ def auto_download():
                         print(f"Download OK {ident}")
                 except:
                     continue
-                time.sleep(2)
+                time.sleep(0.5)
         except:
-            time.sleep(10)
-        time.sleep(60)
+            time.sleep(5)
+        time.sleep(10)
 
 threading.Thread(target=auto_download, daemon=True).start()
 
