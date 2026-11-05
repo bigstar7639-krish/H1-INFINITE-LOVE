@@ -1,21 +1,32 @@
 import threading, os, requests, time, random
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+# All Server Support - PORT Auto!
 def start_web():
     port = int(os.environ.get("PORT", 10000))
     class H(BaseHTTPRequestHandler):
         def do_GET(self):
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"Aira Server ON!")
+            self.wfile.write(b"Aira Server ON! All Server OK!")
         def log_message(self, *a):
             pass
     HTTPServer(("0.0.0.0", port), H).serve_forever()
 threading.Thread(target=start_web, daemon=True).start()
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+BOT_TOKEN_2 = os.environ.get("BOT_TOKEN_2", "")
 GROUP_ID = "-1003935111481"
 CHANNEL_ID = "-1003940504242"
+
+def send_msg(token, text):
+    if not token:
+        return
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        requests.post(url, data={"chat_id": GROUP_ID, "text": text}, timeout=10)
+    except:
+        pass
 
 STORIES = [
     "📖 Story 1: Oru oor la oru ponnu iruntha - Ava per Aira! Ava romba smart! Ava daily Tamil books padippanga! Oru naal ava oru magic book ah paathanga - Athula irunthu Aira ku super power vanthuchu!",
@@ -52,40 +63,38 @@ Q_TEMPLATES = [
 ]
 
 def auto_infinite():
-    print("Aira Final Infinite Start!")
+    print("Aira All Server Infinite Start!")
     count = 0
     while True:
         count += 1
         if count % 4 == 0:
             story = random.choice(STORIES)
-            try:
-                url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-                requests.post(url, data={"chat_id": GROUP_ID, "text": story}, timeout=10)
-            except:
-                pass
+            send_msg(BOT_TOKEN, story)
+            print(f"Story {count}")
             time.sleep(10)
             continue
         topic, ans = random.choice(TOPICS)
         tmpl = random.choice(Q_TEMPLATES)
         q = tmpl.format(topic=topic) + f" #{count}"
-        try:
-            url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-            requests.post(url, data={"chat_id": GROUP_ID, "text": q}, timeout=10)
-            print(f"Q {count}: {q}")
-            time.sleep(5)
-            requests.post(url, data={"chat_id": GROUP_ID, "text": f"👉 {ans}"}, timeout=10)
-        except Exception as e:
-            print(f"Error - {e}")
+        send_msg(BOT_TOKEN, q)
+        print(f"Old Q {count}: {q}")
+        time.sleep(5)
+        token_a = BOT_TOKEN_2 if BOT_TOKEN_2 else BOT_TOKEN
+        send_msg(token_a, f"👉 {ans}")
+        print(f"New A: {ans}")
         time.sleep(10)
 
 threading.Thread(target=auto_infinite, daemon=True).start()
 
 def auto_download():
+    print("Download Start!")
     done = set()
     while True:
         try:
+            print("Download Checking...")
             r = requests.get("https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=50&output=json", timeout=30)
             books = r.json()['response']['docs']
+            print(f"Books Found: {len(books)}")
             for b in books:
                 ident = b['identifier']
                 if ident in done:
@@ -107,18 +116,22 @@ def auto_download():
                     files = {'document': (f"{ident}.txt", tr.text.encode('utf-8'))}
                     data = {'chat_id': CHANNEL_ID, 'caption': f"📖 {b.get('title','')[:40]}"}
                     pr = requests.post(url, files=files, data=data, timeout=60)
+                    print(f"Download Try {ident} - {pr.status_code} - {size:.2f} MB")
                     if pr.status_code == 200:
                         done.add(ident)
-                        print(f"Download OK {ident}")
-                except:
+                except Exception as e:
+                    print(f"One Book Error - {e}")
                     continue
-                time.sleep(0.5)
-        except:
-            time.sleep(5)
-        time.sleep(10)
+                time.sleep(2)
+        except Exception as e:
+            print(f"Download Main Error - {e}")
+            time.sleep(30)
+            continue
+        print("Download Batch Done - 30 sec wait...")
+        time.sleep(30)
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL ON! Infinite Q+A + Story + Download!")
+print("Aira FINAL All Server ON! Q+A + Story + Download!")
 while True:
     time.sleep(60)
