@@ -1,0 +1,49 @@
+{
+  "character": "Aira H1",
+  "phase": "07",
+  "voice": {
+    "gender": "female",
+    "age_style": "young adult, warm, clear, not child-like",
+    "language_primary": "Tamil + English mix",
+    "languages": [
+      "ta-IN",
+      "en-IN",
+      "hi-IN"
+    ],
+    "base_pitch": 1.05,
+    "base_speed": 1.0,
+    "base_volume": 0.9
+  },
+  "controls": {
+    "pitch_range": [
+      0.7,
+      1.4
+    ],
+    "speed_range": [
+      0.7,
+      1.4
+    ],
+    "volume_range": [
+      0.0,
+      1.0
+    ]
+  },
+  "lip_sync": {
+    "visemes": [
+      "A",
+      "E",
+      "I",
+      "O",
+      "U",
+      "M"
+    ],
+    "enabled": true,
+    "note": "Visemes from Phase 03 blendshapes"
+  },
+  "wake_word": {
+    "primary": "Hey Aira",
+    "secondary": "Aira",
+    "note": "Wake-word works where technically supported. On Android, uses on-device detection if available, else tap-to-talk."
+  },
+  "status": "PROFILE ONLY - no audio file yet"
+}
