@@ -1,5 +1,5 @@
-# AIRAH1 - FINAL - Infinite Category + Infinite Image + Infinite Source + Infinite Repo + Infinite Loop
-# File: aira_worker.py - Minus Fix + Wikimedia Fix Odu!
+# AIRAH1 - FINAL - Infinite Category + Infinite Image + Infinite Source + Infinite Repo + Infinite Loop + do_HEAD Fix!
+# File: aira_worker.py
 import os, time, threading, requests, base64, random
 from datetime import datetime
 
@@ -8,7 +8,6 @@ BOT2_TOKEN = os.getenv("BOT2_TOKEN","")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN","")
 GITHUB_USER = "bigstar7639-krish"
 
-# CHANNEL ID FIX - Minus Pona Kooda - Auto Fix!
 def fix_id(v, default):
     v = (v or default).strip()
     if not v: return default
@@ -19,7 +18,6 @@ def fix_id(v, default):
 DATA_CHANNEL = fix_id(os.getenv("DATA_CHANNEL",""), "-1004366479419")
 print(f"Worker Start - Bot1 OK? {bool(BOT1_TOKEN)} Bot2 OK? {bool(BOT2_TOKEN)} Channel: {DATA_CHANNEL}", flush=True)
 
-# INFINITE REPO + LOCK
 CURRENT_REPO = ["H1-Data-3"]; REPO_COUNT = [0]; MAX_PER_REPO = 1000
 SAVE_LOCK = threading.Lock()
 def get_repo_num(r):
@@ -91,12 +89,10 @@ def bot1_image_worker():
             cat = BASE_CATS[idx % len(BASE_CATS)]; idx += 1
             print(f"Bot1 - Infinite Image - Category: {cat} - Batch {idx} - Repo {CURRENT_REPO[0]}", flush=True)
             count = 0
-            # SOURCE 1 - Wikimedia - Fix Odu - JSON Check!
             try:
                 print(f"Source: wikimedia - Query: {cat}", flush=True)
                 r = requests.get("https://commons.wikimedia.org/w/api.php", params={"action":"query","format":"json","list":"search","srsearch":cat,"srnamespace":6,"srlimit":10}, headers={"User-Agent": "AIRAH1-Bot/1.0 (Tamil Books)"}, timeout=20)
-                ctype = r.headers.get("content-type","")
-                if "application/json" not in ctype:
+                if "application/json" not in r.headers.get("content-type",""):
                     print("Wikimedia Skip - Not JSON - Next Source!", flush=True)
                 else:
                     try:
@@ -111,7 +107,6 @@ def bot1_image_worker():
                                 time.sleep(1)
                     except Exception as e: print(f"Wikimedia JSON Error {e} - Skip!", flush=True)
             except Exception as e: print(f"Wikimedia Error {e} - Skip!", flush=True)
-            # SOURCE 2 - Pollinations - Generate - Free!
             try:
                 print(f"Source: pollinations - Generate: {cat}", flush=True)
                 prompt = f"{cat}, Tamil style, cute, colourful, beautiful, Aira style"
@@ -121,7 +116,6 @@ def bot1_image_worker():
                 send_to_channel(f"Auto Image Generate - {cat} - Aira Style 🎨\n{url}", BOT1_TOKEN, "Bot1-Generate")
                 save_github(f"images-generate-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {url}")
             except Exception as e: print(f"Pollinations Error {e}", flush=True)
-            # SOURCE 3 - Unsplash Source!
             try:
                 print(f"Source: unsplash - Query: {cat}", flush=True)
                 url = f"https://source.unsplash.com/800x600/?{cat}"
@@ -191,7 +185,10 @@ if __name__ == "__main__":
     try:
         from http.server import HTTPServer, BaseHTTPRequestHandler
         class H(BaseHTTPRequestHandler):
-            def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Worker Final Infinite ON")
+            def do_GET(self):
+                self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Worker Final Infinite ON")
+            def do_HEAD(self):
+                self.send_response(200); self.end_headers()
             def log_message(self,*a): pass
         HTTPServer(("0.0.0.0", int(os.getenv("PORT","10000"))), H).serve_forever()
     except:
