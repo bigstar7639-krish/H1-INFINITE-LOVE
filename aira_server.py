@@ -1,22 +1,30 @@
-# AIRAH1 - FINAL FIXED - Infinite Smart Chat
+# AIRAH1 - FINAL CODE - Real Fix
 # File: aira_server.py
 import os, random, time, threading, requests, base64
 from datetime import datetime
 
-# FIX - Rendum Peru Support - Env Peru Enna Irundhalum Work Aagum!
+# --- FIX 1: Token - Rendum Peru Support ---
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN","") or os.getenv("BOT_TOKEN","") or os.getenv("BOT_TOKEN_2","")
 GROQ_KEYS = [os.getenv("GROQ_API_KEY",""), os.getenv("GROQ_API_KEY_2",""), os.getenv("GROQ_API_KEY_3","")]
 GEMINI_KEYS = [os.getenv("GEMINI_API_KEY",""), os.getenv("GEMINI_API_KEY_2","")]
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN","")
 GITHUB_USER = "bigstar7639-krish"
-CHAT_ID = os.getenv("CHAT_ID","") or os.getenv("GROUP_ID","-1003935111481")
-BOOKS_ID = os.getenv("BOOKS_ID","") or os.getenv("CHANNEL_ID","-1003940504242")
+
+# --- FIX 2: Chat ID - Minus Illa na Thanave Add Pannum ---
+def fix_id(v, default):
+    v = (v or default).strip()
+    if not v: return default
+    if v.startswith("-"): return v
+    if v.startswith("100"): return "-" + v
+    return "-100" + v
+
+CHAT_ID = fix_id(os.getenv("CHAT_ID","") or os.getenv("GROUP_ID",""), "-1003935111481")
+BOOKS_ID = fix_id(os.getenv("BOOKS_ID","") or os.getenv("CHANNEL_ID",""), "-1003940504242")
 print(f"Token OK? {bool(TELEGRAM_TOKEN)} Chat: {CHAT_ID} Books: {BOOKS_ID}", flush=True)
 
 TOPICS = ["Love","Career","Health","Money","AI","Tech","Space","Business","Anger","Confidence","Happiness","Food","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Kindness","Nature","Music","Travel","Book","Life","Time","Trust","Hope","Faith","Smile","Heart","Soul","Future","Past","Present","Freedom","Truth","Wisdom","Power","Energy","Magic","Luck","Destiny","Karma","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Movie","Game","Sport","Cricket","Football","Science","Maths","History","Geography","Politics","Culture","Festival","Marriage","Baby","Child","Mother","Father","Brother","Sister","Teacher","Student","Job","Interview","Salary","Business Idea","Startup","Coding","Python","Internet","Phone","Social Media","YouTube","Instagram","Telegram","Rain","Sea","Mountain","River","Sky","Star","Moon","Sun","Flower","Tree","Bird","Animal","Dog","Cat","Temple","Prayer","God","Spiritual","Tamil Culture","Chennai","India","World","Universe","Alien","Robot","Future Tech","Electric Car","Climate","Environment","Water","Air","Earth","Sad","Happy","Life"]
-
 QUESTIONS = ["Unakku {t} pathi enna theriyum? Sollu paapom!","Ne {t} la eppadi improve panna mudiyum?","{t} pathi oru secret sollatta?","Un life la {t} eppadi irukku? Happy ah?","{t} pathi oru story kekkura?","Life ku artham enna?","Family problem ah eppadi solve pannanum?","Sad - Enna pannalam?"]
-ANSWERS = ["{t} - Life la romba mukkiyam! Daily try pannu - Jeyichiduva! Aira un kooda irukka!","Unakku {t} pathi doubt iruntha - Kekkam - Aira sollitharen!"]
+ANSWERS = ["{t} - Life la romba mukkiyam! Daily konjam konjam try pannu - Jeyichiduva! Aira un kooda irukka!","Unakku {t} pathi doubt iruntha - Kekkam - Aira sollitharen!"]
 JOKES = ["Teacher: Yen late? Student: Road la board paathen - School Ahead! 😂","Why bike sad? Petrol illa!","Doctor: Enna problem? Patient: Phone charge aagala - Life charge aagala! 😂"]
 FACTS = ["Honey - 3000 varusham aana kooda kedathu!","Octopus ku 3 heart irukku!","Moon - Daily konjam konjam thalli poguthu!","Tamil - 2000+ varusha pazhamaiyana mozhi!"]
 QUOTES = ["Daily try pannu - Jeyichiduva! - Aira","Porumaiya iru - Nambikkaiya iru - Aira un kooda irukka!"]
@@ -46,8 +54,8 @@ def save_github(filename, content):
         payload = {"message": f"Save {filename}", "content": b64}
         if sha: payload["sha"] = sha
         rr = requests.put(url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, json=payload, timeout=10)
-        if rr.status_code in (200, 201): print(f"【entity-GitHub¦canonical_name=GitHub】 Save OK - H1-Data-3/{filename} - Count {count}", flush=True)
-    except Exception as e: print("【entity-GitHub¦canonical_name=GitHub】 error", e, flush=True)
+        if rr.status_code in (200, 201): print(f"GitHub Save OK - H1-Data-3/{filename} - Count {count}", flush=True)
+    except Exception as e: print("GitHub error", e, flush=True)
 
 def ai_answer(q):
     for key in GROQ_KEYS:
@@ -152,14 +160,14 @@ def listen_loop():
         except Exception as e: print("Listen error", e, flush=True); time.sleep(5)
 
 if __name__ == "__main__":
-    print("AIRAH1 Fixed Infinite - Started", flush=True)
+    print("AIRAH1 Final Fixed Infinite - Started", flush=True)
     threading.Thread(target=infinite_loop, daemon=True).start()
     threading.Thread(target=listen_loop, daemon=True).start()
     threading.Thread(target=books_loop, daemon=True).start()
     try:
         from http.server import HTTPServer, BaseHTTPRequestHandler
         class H(BaseHTTPRequestHandler):
-            def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Fixed Infinite ON")
+            def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Final Fixed Infinite ON")
             def log_message(self, *a): pass
         HTTPServer(("0.0.0.0", int(os.getenv("PORT", "10000"))), H).serve_forever()
     except:
