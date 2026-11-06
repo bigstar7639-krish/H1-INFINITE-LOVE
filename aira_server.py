@@ -1,5 +1,6 @@
-import threading, os, requests, time, random, urllib.parse
+import threading, os, requests, time, random, urllib.parse, json, base64
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from datetime import datetime
 
 def start_web():
     port = int(os.environ.get("PORT", 10000))
@@ -22,20 +23,98 @@ GROQ_2 = os.environ.get("GROQ_API_KEY_2", "")
 GROQ_3 = os.environ.get("GROQ_API_KEY_3", "")
 GEMINI_1 = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_2 = os.environ.get("GEMINI_API_KEY_2", "")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_USER = "bigstar7639-krish"
 
-def send_msg(token, text):
+# ===== GITHUB AUTO REPO SAVE - INFINITE CHAT SAVE =====
+CURRENT_REPO_NUM = [1]
+SAVE_COUNT = [0]
+
+def github_headers():
+    return {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+
+def ensure_repo(repo_name):
+    if not GITHUB_TOKEN:
+        return False
+    try:
+        r = requests.get(f"https://api.github.com/repos/{GITHUB_USER}/{repo_name}", headers=github_headers(), timeout=15)
+        if r.status_code == 200:
+            return True
+        # Create new repo
+        r = requests.post("https://api.github.com/user/repos", headers=github_headers(),
+            json={"name": repo_name, "private": False, "description": f"Aira H1 Data - Auto Save - {repo_name}"}, timeout=15)
+        print(f"GitHub Repo Create {repo_name} - {r.status_code}")
+        return r.status_code in [200, 201]
+    except Exception as e:
+        print(f"GitHub Repo Error - {e}")
+        return False
+
+def github_save(filename, content_text):
+    if not GITHUB_TOKEN:
+        return
+    try:
+        # Repo full check - 900 files ku mela - New Repo!
+        if SAVE_COUNT[0] > 900:
+            CURRENT_REPO_NUM[0] += 1
+            SAVE_COUNT[0] = 0
+            print(f"【entity-GitHub¦canonical_name=GitHub】 New Repo - H1-Data-{CURRENT_REPO_NUM[0]}")
+        repo = f"H1-Data-{CURRENT_REPO_NUM[0]}"
+        ensure_repo(repo)
+        # File already irukka check
+        path = f"data/{filename}"
+        url = f"https://api.github.com/repos/{GITHUB_USER}/{repo}/contents/{path}"
+        r = requests.get(url, headers=github_headers(), timeout=15)
+        sha = None
+        if r.status_code == 200:
+            sha = r.json().get('sha')
+        b64 = base64.b64encode(content_text.encode('utf-8')).decode('utf-8')
+        payload = {"message": f"Aira Auto Save - {filename}", "content": b64}
+        if sha:
+            payload["sha"] = sha
+        r = requests.put(url, headers=github_headers(), json=payload, timeout=20)
+        if r.status_code in [200, 201]:
+            SAVE_COUNT[0] += 1
+            print(f"GitHub Save OK - {repo}/{filename} - Count {SAVE_COUNT[0]}")
+        else:
+            print(f"GitHub Save Fail - {r.status_code} - {r.text[:100]}")
+    except Exception as e:
+        print(f"【entity-GitHub¦canonical_name=GitHub】 Save Error - {e}")
+
+def save_chat_to_github(msg_type, text):
+    try:
+        today = datetime.now().strftime("%Y-%m-%d")
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        fname = f"chat-{today}.txt"
+        line = f"[{ts}] [{msg_type}] {text}\n"
+        # Thread la save - Slow aaga koodathu!
+        threading.Thread(target=github_save, args=(fname, line), daemon=True).start()
+    except:
+        pass
+
+def save_book_to_github(title, source):
+    try:
+        today = datetime.now().strftime("%Y-%m-%d")
+        fname = f"books-{today}.txt"
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        line = f"[{ts}] [BOOK] {source} - {title}\n"
+        threading.Thread(target=github_save, args=(fname, line), daemon=True).start()
+    except:
+        pass
+
+def send_msg(token, text, save_type="CHAT"):
     if not token:
         return
     try:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         requests.post(url, data={"chat_id": GROUP_ID, "text": text}, timeout=10)
+        # Auto Save to GitHub!
+        save_chat_to_github(save_type, text)
     except:
         pass
 
-# ===== AI BRAIN - MODEL LIST ROTATE - 404 Varaathu! =====
+# ===== AI BRAIN =====
 GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen/qwen3-32b", "moonshotai/kimi-k2-instruct"]
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
-
 def ai_answer(question):
     for key, kname in [(GROQ_1, "Groq1"), (GROQ_2, "Groq2"), (GROQ_3, "Groq3")]:
         if not key:
@@ -87,7 +166,7 @@ Q_TEMPLATES = ["{topic} na enna?", "{topic} pathi sollu", "{topic} la enna speci
 AI_QUESTIONS = ["Kadhal na enna?", "Life la jeyikka enna pannanum?", "Sad ah irukkum pothu enna pannanum?", "Tamil mozhi yen special?", "Thirukkural la enna solirukku?", "Friendship ah eppadi kaapathurathu?", "Dream ah eppadi achieve pannanum?", "Bayam ah eppadi poganum?"]
 
 def auto_infinite():
-    print("All Infinite Start! AI Brain 5 Keys ON! Model List Rotate!")
+    print("All Infinite Start! AI Brain + GitHub Save ON!")
     count = 0
     while True:
         count += 1
@@ -97,36 +176,36 @@ def auto_infinite():
                 topic, ans = random.choice(TOPICS)
                 tmpl = random.choice(Q_TEMPLATES)
                 q = tmpl.format(topic=topic) + f" #{count}"
-                send_msg(BOT_TOKEN, q)
+                send_msg(BOT_TOKEN, q, "Q")
                 print(f"Q {count}")
                 time.sleep(5)
                 token_a = BOT_TOKEN_2 if BOT_TOKEN_2 else BOT_TOKEN
-                send_msg(token_a, f"👉 {ans}")
+                send_msg(token_a, f"👉 {ans}", "A")
             elif mod == 2:
                 aq = random.choice(AI_QUESTIONS)
-                send_msg(BOT_TOKEN, f"🤖 AI Q: {aq}")
+                send_msg(BOT_TOKEN, f"🤖 AI Q: {aq}", "AI-Q")
                 print(f"AI Q {count} - {aq}")
                 time.sleep(5)
                 ai_ans = ai_answer(aq)
                 token_a = BOT_TOKEN_2 if BOT_TOKEN_2 else BOT_TOKEN
                 if ai_ans:
-                    send_msg(token_a, f"🧠 Aira AI: {ai_ans}")
+                    send_msg(token_a, f"🧠 Aira AI: {ai_ans}", "AI-A")
                 else:
-                    send_msg(token_a, f"👉 Kadhal na anbu! Daily konjam try pannu - Jeyichiduva! 💜")
+                    send_msg(token_a, f"👉 Kadhal na anbu! Daily konjam try pannu - Jeyichiduva! 💜", "AI-A-Fallback")
             elif mod == 3:
-                send_msg(BOT_TOKEN, make_story())
+                send_msg(BOT_TOKEN, make_story(), "Story")
                 print(f"Story {count}")
             elif mod == 4:
-                send_msg(BOT_TOKEN, random.choice(JOKES))
+                send_msg(BOT_TOKEN, random.choice(JOKES), "Joke")
                 print(f"Joke {count}")
             elif mod == 5:
-                send_msg(BOT_TOKEN, random.choice(FACTS))
+                send_msg(BOT_TOKEN, random.choice(FACTS), "Fact")
                 print(f"Fact {count}")
             elif mod == 6:
-                send_msg(BOT_TOKEN, random.choice(QUOTES))
+                send_msg(BOT_TOKEN, random.choice(QUOTES), "Quote")
                 print(f"Quote {count}")
             else:
-                send_msg(BOT_TOKEN, random.choice(MOTIVATIONS))
+                send_msg(BOT_TOKEN, random.choice(MOTIVATIONS), "Motivation")
                 print(f"Motivation {count}")
         except Exception as e:
             print(f"Error - {e}")
@@ -140,6 +219,8 @@ def send_book_file(filename, content, caption):
         files = {'document': (filename, content)}
         data = {'chat_id': CHANNEL_ID, 'caption': caption[:200]}
         pr = requests.post(url, files=files, data=data, timeout=60)
+        if pr.status_code == 200:
+            save_book_to_github(caption, "telegram-channel")
         return pr.status_code
     except:
         return 0
@@ -165,14 +246,12 @@ def fetch_gutenberg(q, pg):
         headers = {"User-Agent": "Mozilla/5.0"}
         r = requests.get(f"https://gutendex.com/books/?languages=en&page=1", headers=headers, timeout=20)
         if r.status_code != 200:
-            print(f"Gutenberg Skip - Status {r.status_code}")
             return []
         books = []
         for b in r.json().get('results', [])[:10]:
             books.append((str(b['id']), b['title'], "gutenberg"))
         return books
-    except Exception as e:
-        print(f"Gutenberg Error - {e}")
+    except:
         return []
 def fetch_openlibrary(q, pg):
     try:
@@ -326,6 +405,6 @@ def auto_download():
         time.sleep(10)
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON! Model List Rotate + Broad Books!")
+print("Aira FINAL All Infinite ON! GitHub Auto Save + AI Brain + Books!")
 while True:
     time.sleep(60)
