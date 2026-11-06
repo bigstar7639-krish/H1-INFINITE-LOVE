@@ -32,42 +32,45 @@ def send_msg(token, text):
     except:
         pass
 
-# ===== AI BRAIN - NEW MODELS - 404 FIX =====
+# ===== AI BRAIN - MODEL LIST ROTATE - 404 Varaathu! =====
+GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen/qwen3-32b", "moonshotai/kimi-k2-instruct"]
+GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
+
 def ai_answer(question):
-    # Groq - NEW MODEL llama-3.3-70b-versatile
-    for key, name in [(GROQ_1, "Groq1"), (GROQ_2, "Groq2"), (GROQ_3, "Groq3")]:
+    for key, kname in [(GROQ_1, "Groq1"), (GROQ_2, "Groq2"), (GROQ_3, "Groq3")]:
         if not key:
             continue
-        try:
-            r = requests.post("https://api.groq.com/openai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                json={"model": "llama-3.3-70b-versatile", "messages": [{"role": "system", "content": "Ne Aira H1, Tamil Tanglish la pesura cute friend. Short ah 2-3 lines la anba answer pannu."}, {"role": "user", "content": question}]},
-                timeout=20)
-            if r.status_code == 200:
-                ans = r.json()['choices'][0]['message']['content']
-                print(f"AI Answer - {name} - OK")
-                return ans[:500]
-            else:
-                print(f"AI Fail {name} - {r.status_code} - {r.text[:100]}")
-        except Exception as e:
-            print(f"AI Error {name} - {e}")
-            continue
-    # Gemini - NEW MODEL gemini-2.0-flash
-    for key, name in [(GEMINI_1, "Gemini1"), (GEMINI_2, "Gemini2")]:
+        for model in GROQ_MODELS:
+            try:
+                r = requests.post("https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                    json={"model": model, "messages": [{"role": "system", "content": "Ne Aira H1, Tamil Tanglish la pesura cute friend. Short ah 2-3 lines la anba answer pannu."}, {"role": "user", "content": question}]},
+                    timeout=15)
+                if r.status_code == 200:
+                    ans = r.json()['choices'][0]['message']['content']
+                    print(f"AI Answer - {kname} - {model} - OK")
+                    return ans[:500]
+                else:
+                    print(f"AI Fail {kname} - {model} - {r.status_code}")
+                    if r.status_code == 429:
+                        break
+            except:
+                continue
+    for key, kname in [(GEMINI_1, "Gemini1"), (GEMINI_2, "Gemini2")]:
         if not key:
             continue
-        try:
-            r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}",
-                json={"contents": [{"parts": [{"text": f"Ne Aira H1, Tamil Tanglish la cute friend. Short ah 2-3 lines la answer pannu. Question: {question}"}]}]}, timeout=20)
-            if r.status_code == 200:
-                ans = r.json()['candidates'][0]['content']['parts'][0]['text']
-                print(f"AI Answer - {name} - OK")
-                return ans[:500]
-            else:
-                print(f"AI Fail {name} - {r.status_code} - {r.text[:100]}")
-        except Exception as e:
-            print(f"AI Error {name} - {e}")
-            continue
+        for model in GEMINI_MODELS:
+            try:
+                r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}",
+                    json={"contents": [{"parts": [{"text": f"Ne Aira H1, Tamil Tanglish la cute friend. Short ah 2-3 lines la answer pannu. Question: {question}"}]}]}, timeout=15)
+                if r.status_code == 200:
+                    ans = r.json()['candidates'][0]['content']['parts'][0]['text']
+                    print(f"AI Answer - {kname} - {model} - OK")
+                    return ans[:500]
+                else:
+                    print(f"AI Fail {kname} - {model} - {r.status_code}")
+            except:
+                continue
     return None
 
 STORY_STARTERS = ["Oru oor la oru ponnu iruntha - Ava per Aira!", "Oru kaadu la oru singam irunthuchu!", "Oru oor la periya noolagam irunthuchu!", "Oru paiyan oru ponna love pannaan!", "Oru chinna paiyan daily school ku ponaan!", "Oru oor la mazhaiye varala!", "Oru bike la oru paiyan oor suthinaan!"]
@@ -84,7 +87,7 @@ Q_TEMPLATES = ["{topic} na enna?", "{topic} pathi sollu", "{topic} la enna speci
 AI_QUESTIONS = ["Kadhal na enna?", "Life la jeyikka enna pannanum?", "Sad ah irukkum pothu enna pannanum?", "Tamil mozhi yen special?", "Thirukkural la enna solirukku?", "Friendship ah eppadi kaapathurathu?", "Dream ah eppadi achieve pannanum?", "Bayam ah eppadi poganum?"]
 
 def auto_infinite():
-    print("All Infinite Start! AI Brain 5 Keys ON! New Models!")
+    print("All Infinite Start! AI Brain 5 Keys ON! Model List Rotate!")
     count = 0
     while True:
         count += 1
@@ -130,7 +133,6 @@ def auto_infinite():
         time.sleep(10)
 threading.Thread(target=auto_infinite, daemon=True).start()
 
-# BOOKS - Broad Query Fix - 0 Varathu!
 QUERIES = ["Tamil", "Tamil", "Tamil", "Bharathiyar", "Thirukkural", "Kavithai"]
 def send_book_file(filename, content, caption):
     try:
@@ -146,7 +148,6 @@ def is_bad_ident(ident):
     return any(x in low for x in ["zim", " wikipedia", "wikibooks", "wikiquote", "wikinews"])
 def fetch_archive(q, pg):
     try:
-        # Broad - language mattum - Query specific illa - 0 varaathu!
         q_full = "language:(tamil) AND mediatype:texts"
         q_enc = urllib.parse.quote(q_full)
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -294,12 +295,10 @@ def auto_download():
     print("All Book Source Infinite Start! All Free Sources!")
     done = set()
     src_idx = 0
-    pg_counter = 1
     while True:
         try:
             src = SOURCES[src_idx % len(SOURCES)]
             src_idx += 1
-            pg_counter += 1
             pg = random.randint(1, 20)
             q = QUERIES[src_idx % len(QUERIES)]
             print(f"Download Source: {src} - Query: {q} - Page {pg}")
@@ -327,6 +326,6 @@ def auto_download():
         time.sleep(10)
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON! New Models + Broad Books!")
+print("Aira FINAL All Infinite ON! Model List Rotate + Broad Books!")
 while True:
     time.sleep(60)
