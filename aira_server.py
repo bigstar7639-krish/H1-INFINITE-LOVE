@@ -1,4 +1,4 @@
-# AIRAH1 - FINAL INFINITE - Full Check Panna Code - Festival Fix + do_HEAD Fix Odu
+# AIRAH1 - FINAL INFINITE - Full Check Panna Code - Festival Fix + do_HEAD Fix + AI Bug Fix Odu
 # File: aira_server.py - Old + New + Work Aagum Mattum
 import os, random, time, threading, requests, base64, re
 from datetime import datetime
@@ -146,12 +146,18 @@ def get_quote():
             j = r.json(); return f"{j.get('content','')} - {j.get('author','')}"
     except: pass
     return random.choice(QUOTES)
+# --- AI BUG FIX: "Aira" la "ai" irukku nu confuse aaga koodathu ---
 def ai_answer(q):
     low = q.lower()
+    # FIX 1: "aira" va remove pannu - appo "ai" thaniya iruntha mattum AI answer
+    clean = low.replace("aira"," ").replace("aira!"," ").replace("aira,"," ")
+    words = re.findall(r"[a-z]+", clean)
     for k,v in CODING_A.items():
-        if k in low: return v
+        if k in words: return v
+        # python, html, javascript pola periya word na substring ok - aana "ai" "app" "bug" ku full word mattum
+        if len(k) > 3 and k in clean: return v
     for k,v in EMOTIONS.items():
-        if k in low: return random.choice(v)
+        if k in words: return random.choice(v)
     for key in GROQ_KEYS:
         if not key: continue
         try:
@@ -174,6 +180,11 @@ def calc(text):
     return None
 def ai_reply(txt, uid=None, uname="Friend"):
     low = txt.lower()
+    # FIX: "Aira me krishna" nu sonna - Hi illa - Groq ku po - AI Data nu solla koodathu
+    # Aira nu koopta mattum - Friend greeting kodu
+    clean_low = low.replace("aira","").strip()
+    if clean_low in ["me krishna","me krish","naan krishna","naan krish","krishna","krish"]:
+        return f"Hi {uname}! 💜 Ne Thaan En Friend! Aprom enna? Story venuma? Game venuma?"
     if uid and ("hi" in low or "hello" in low):
         mem = get_memory_greeting(uid)
         if mem: return mem
