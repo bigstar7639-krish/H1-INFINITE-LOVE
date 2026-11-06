@@ -103,88 +103,206 @@ def auto_infinite():
 
 threading.Thread(target=auto_infinite, daemon=True).start()
 
-# FINAL FIX - title: Illa - Full Text Search!
-QUERIES = [
-    "Thirukkural AND language:(tamil) AND mediatype:texts",
-    "Bharathiyar AND language:(tamil) AND mediatype:texts",
-    "Kavithai AND language:(tamil) AND mediatype:texts",
-    "Tamil AND language:(tamil) AND mediatype:texts",
-    "Novel AND language:(tamil) AND mediatype:texts",
-    "Kural AND language:(tamil) AND mediatype:texts",
-    "Padal AND language:(tamil) AND mediatype:texts",
-    "History AND language:(tamil) AND mediatype:texts",
-]
+# ===== ALL FREE SOURCES =====
+QUERIES = ["Thirukkural", "Bharathiyar", "Kavithai", "Tamil", "Novel", "Kural", "Padal", "History", "Kamban", "Avvaiyar", "Vallalar", "Tholkappiyam"]
+
+def send_book_file(filename, content, caption):
+    try:
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+        files = {'document': (filename, content)}
+        data = {'chat_id': CHANNEL_ID, 'caption': caption[:200]}
+        pr = requests.post(url, files=files, data=data, timeout=60)
+        return pr.status_code
+    except Exception as e:
+        print(f"Send Book Error - {e}")
+        return 0
+
+def is_bad_ident(ident):
+    low = ident.lower()
+    return any(x in low for x in ["zim", "【entity-wikipedia¦canonical_name=Wikipedia】", "wikibooks", "wikiquote", "wikinews", "wikivoyage"])
+
+def fetch_archive(q, pg):
+    books = []
+    q_full = f"{q} AND language:(tamil) AND mediatype:texts"
+    q_enc = urllib.parse.quote(q_full)
+    r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg}&output=json", timeout=30)
+    for d in r.json()['response']['docs']:
+        books.append((d['identifier'], d.get('title',''), "archive"))
+    return books
+
+def fetch_gutenberg(q, pg):
+    books = []
+    # Gutendex - Tamil + English classic
+    lang = "ta" if random.random() < 0.5 else "en"
+    r = requests.get(f"https://gutendex.com/books/?languages={lang}&search={urllib.parse.quote(q)}&page={pg}", timeout=20)
+    for b in r.json().get('results', [])[:10]:
+        books.append((str(b['id']), b['title'], "gutenberg"))
+    return books
+
+def fetch_openlibrary(q, pg):
+    books = []
+    r = requests.get(f"https://openlibrary.org/search.json?q={urllib.parse.quote(q)}+language:tam&limit=20&page={pg}", timeout=20)
+    for b in r.json().get('docs', [])[:10]:
+        key = b.get('key','').replace('/works/','')
+        # OpenLibrary la direct TXT illa - archive.org identifier irundha use pannu
+        ia = b.get('ia', [])
+        if ia:
+            books.append((ia[0], b.get('title',''), "archive"))
+        else:
+            books.append((key, b.get('title',''), "openlibrary"))
+    return books
+
+def fetch_wikisource(q, pg):
+    books = []
+    # Tamil Wikisource
+    r = requests.get(f"https://ta.wikisource.org/w/api.php?action=query&list=search&srsearch={urllib.parse.quote(q)}&format=json&srlimit=20&sroffset={(pg-1)*20}", timeout=20)
+    for d in r.json().get('query', {}).get('search', []):
+        books.append((d['title'].replace(' ', '_'), d['title'], "wikisource"))
+    return books
+
+def fetch_google_books(q, pg):
+    books = []
+    start = (pg-1)*10
+    r = requests.get(f"https://www.googleapis.com/books/v1/volumes?q={urllib.parse.quote(q)}+lang:ta&startIndex={start}&maxResults=10", timeout=20)
+    for item in r.json().get('items', []):
+        vol = item.get('volumeInfo', {})
+        books.append((item['id'], vol.get('title',''), "googlebooks"))
+    return books
+
+def fetch_madurai(q, pg):
+    # Project Madurai - Archive.org la Madurai collection
+    books = []
+    q_full = f"{q} AND collection:(projectmadurai OR opensource) AND language:(tamil)"
+    q_enc = urllib.parse.quote(q_full)
+    r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg}&output=json", timeout=30)
+    for d in r.json()['response']['docs']:
+        books.append((d['identifier'], d.get('title',''), "archive"))
+    return books
+
+def fetch_manybooks(q, pg):
+    # ManyBooks via Gutenberg fallback - use OpenLibrary search
+    return fetch_openlibrary(q, pg)
+
+def fetch_standard_ebooks(q, pg):
+    # Standard Ebooks - Gutenberg based
+    return fetch_gutenberg(q, pg)
+
+SOURCES = ["archive", "gutenberg", "openlibrary", "wikisource", "googlebooks", "madurai", "manybooks", "standardebooks"]
+
+def download_one(ident, title, typ, done):
+    if is_bad_ident(ident):
+        print(f"Skip ZIM {ident}")
+        return False
+    if ident in done:
+        return False
+    try:
+        content = None
+        fname = f"{ident}.txt"
+        if typ == "archive":
+            meta = requests.get(f"https://archive.org/metadata/{ident}", timeout=30).json()
+            txt = None
+            for f in meta.get('files', []):
+                if f.get('name','').endswith('_djvu.txt'):
+                    txt = f['name']; break
+            if not txt:
+                for f in meta.get('files', []):
+                    if f.get('name','').endswith('_text.txt'):
+                        txt = f['name']; break
+            if not txt:
+                print(f"Skip No TXT {ident}")
+                done.add(ident); return False
+            tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
+            content = tr.text.encode('utf-8')
+        elif typ == "gutenberg":
+            # Try multiple Gutenberg mirrors
+            for url in [f"https://www.gutenberg.org/files/{ident}/{ident}-0.txt", f"https://www.gutenberg.org/cache/epub/{ident}/pg{ident}.txt"]:
+                try:
+                    tr = requests.get(url, timeout=30)
+                    if tr.status_code == 200 and len(tr.content) > 5000:
+                        content = tr.content; break
+                except: continue
+            if not content:
+                print(f"Skip Gutenberg No TXT {ident}")
+                done.add(ident); return False
+        elif typ == "wikisource":
+            r = requests.get(f"https://ta.wikisource.org/w/api.php?action=query&prop=extracts&explaintext=1&titles={urllib.parse.quote(ident)}&format=json", timeout=20)
+            pages = r.json().get('query', {}).get('pages', {})
+            txt = ""
+            for p in pages.values():
+                txt = p.get('extract','')
+            if not txt or len(txt) < 1000:
+                print(f"Skip Wikisource Small {ident}")
+                done.add(ident); return False
+            content = txt.encode('utf-8')
+        elif typ == "googlebooks":
+            # Google Books - description + info only, save as text
+            r = requests.get(f"https://www.googleapis.com/books/v1/volumes/{ident}", timeout=20)
+            info = r.json().get('volumeInfo', {})
+            txt = f"Title: {info.get('title','')}\nAuthors: {','.join(info.get('authors',[]))}\n\n{info.get('description','')}\n\nCategories: {','.join(info.get('categories',[]))}\nPublished: {info.get('publishedDate','')}"
+            if len(txt) < 500:
+                print(f"Skip GoogleBooks Small {ident}")
+                done.add(ident); return False
+            content = txt.encode('utf-8')
+            fname = f"{ident}-googlebooks.txt"
+        elif typ == "openlibrary":
+            print(f"Skip OpenLibrary No Direct TXT {ident}")
+            done.add(ident); return False
+        else:
+            return False
+
+        size = len(content)/(1024*1024)
+        if size < 0.02:
+            print(f"Skip Small {ident} - {size:.2f} MB")
+            done.add(ident); return False
+        code = send_book_file(fname, content, f"📖 {title[:40]} - {typ}")
+        print(f"Download {typ} {ident} - {code} - {size:.2f} MB")
+        if code == 200:
+            done.add(ident); return True
+        return False
+    except Exception as e:
+        print(f"One Book Error {typ} {ident} - {e}")
+        return False
 
 def auto_download():
-    print("All Book Source Infinite Start!")
+    print("All Book Source Infinite Start! All Free Sources!")
     done = set()
+    src_idx = 0
     q_idx = 0
     while True:
         try:
-            q_raw = QUERIES[q_idx % len(QUERIES)]
+            src = SOURCES[src_idx % len(SOURCES)]
+            src_idx += 1
+            q = QUERIES[q_idx % len(QUERIES)]
             q_idx += 1
             pg = random.randint(1, 5)
-            q_enc = urllib.parse.quote(q_raw)
-            print(f"Download Query: {q_raw} - Page {pg}")
-            r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg}&output=json", timeout=30)
-            books = r.json()['response']['docs']
-            print(f"Books Found: {len(books)}")
+            print(f"Download Source: {src} - Query: {q} - Page {pg}")
+            books = []
+            try:
+                if src == "archive": books = fetch_archive(q, pg)
+                elif src == "gutenberg": books = fetch_gutenberg(q, pg)
+                elif src == "openlibrary": books = fetch_openlibrary(q, pg)
+                elif src == "wikisource": books = fetch_wikisource(q, pg)
+                elif src == "googlebooks": books = fetch_google_books(q, pg)
+                elif src == "madurai": books = fetch_madurai(q, pg)
+                elif src == "manybooks": books = fetch_manybooks(q, pg)
+                elif src == "standardebooks": books = fetch_standard_ebooks(q, pg)
+            except Exception as e:
+                print(f"Fetch Error {src} - {e}")
+                time.sleep(5); continue
+            print(f"Books Found {src}: {len(books)}")
             new_count = 0
-            for b in books:
-                ident = b['identifier']
-                low = ident.lower()
-                if "zim" in low or "wikipedia" in low or "wikibooks" in low or "wikiquote" in low or "wikinews" in low:
-                    print(f"Skip ZIM {ident}")
-                    continue
-                if ident in done:
-                    print(f"Skip Already Done {ident}")
-                    continue
-                try:
-                    meta = requests.get(f"https://archive.org/metadata/{ident}", timeout=30).json()
-                    txt = None
-                    for f in meta.get('files', []):
-                        name = f.get('name','')
-                        if name.endswith('_djvu.txt'):
-                            txt = name
-                            break
-                    if not txt:
-                        for f in meta.get('files', []):
-                            name = f.get('name','')
-                            if name.endswith('_text.txt'):
-                                txt = name
-                                break
-                    if not txt:
-                        print(f"Skip No TXT {ident}")
-                        done.add(ident)
-                        continue
-                    tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
-                    content = tr.text.encode('utf-8')
-                    size = len(content)/(1024*1024)
-                    if size < 0.05:
-                        print(f"Skip Small {ident} - {size:.2f} MB")
-                        done.add(ident)
-                        continue
-                    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
-                    files = {'document': (f"{ident}.txt", content)}
-                    data = {'chat_id': CHANNEL_ID, 'caption': f"📖 {b.get('title','')[:40]}"}
-                    pr = requests.post(url, files=files, data=data, timeout=60)
-                    print(f"Download {ident} - {pr.status_code} - {size:.2f} MB")
-                    if pr.status_code == 200:
-                        done.add(ident)
-                        new_count += 1
-                except Exception as e:
-                    print(f"One Book Error {ident} - {e}")
-                    continue
+            for ident, title, typ in books:
+                if download_one(ident, title, typ, done):
+                    new_count += 1
                 time.sleep(2)
-            print(f"Batch Done - New {new_count} - 10 sec wait...")
+            print(f"Batch Done - {src} - New {new_count} - 10 sec wait...")
         except Exception as e:
             print(f"Download Main Error - {e}")
-            time.sleep(10)
-            continue
+            time.sleep(10); continue
         time.sleep(10)
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON! Full Search + ZIM Filter!")
+print("Aira FINAL All Infinite ON! All Free Sources!")
 while True:
     time.sleep(60)
