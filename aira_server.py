@@ -1,9 +1,8 @@
-# AIRAH1 - FINAL MEGA - Infinite All - All Source All Chat All Coding All Emotions All Smart All Talk All Reading All Book
+# AIRAH1 - FINAL CODE - Mega Infinite All - Filter Odu
 # File: aira_server.py
 import os, random, time, threading, requests, base64
 from datetime import datetime
 
-# --- TOKEN FIX ---
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN","") or os.getenv("BOT_TOKEN","") or os.getenv("BOT_TOKEN_2","")
 GROQ_KEYS = [os.getenv("GROQ_API_KEY",""), os.getenv("GROQ_API_KEY_2",""), os.getenv("GROQ_API_KEY_3","")]
 GEMINI_KEYS = [os.getenv("GEMINI_API_KEY",""), os.getenv("GEMINI_API_KEY_2","")]
@@ -21,10 +20,7 @@ CHAT_ID = fix_id(os.getenv("CHAT_ID","") or os.getenv("GROUP_ID",""), "-10039351
 BOOKS_ID = fix_id(os.getenv("BOOKS_ID","") or os.getenv("CHANNEL_ID",""), "-1003940504242")
 print(f"Token OK? {bool(TELEGRAM_TOKEN)} Chat: {CHAT_ID} Books: {BOOKS_ID}", flush=True)
 
-# --- ALL TOPICS - 150+ ---
 TOPICS = ["Love","Career","Health","Money","AI","Tech","Space","Business","Anger","Confidence","Happiness","Food","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Kindness","Nature","Music","Travel","Book","Life","Time","Trust","Hope","Faith","Smile","Heart","Soul","Future","Past","Present","Freedom","Truth","Wisdom","Power","Energy","Magic","Luck","Destiny","Karma","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Movie","Game","Sport","Cricket","Football","Science","Maths","History","Geography","Politics","Culture","Festival","Marriage","Baby","Child","Mother","Father","Brother","Sister","Teacher","Student","Job","Interview","Salary","Business Idea","Startup","Coding","Python","Java","C","JavaScript","HTML","CSS","React","AI Coding","Internet","Phone","Social Media","YouTube","Instagram","Telegram","Rain","Sea","Mountain","River","Sky","Star","Moon","Sun","Flower","Tree","Bird","Animal","Dog","Cat","Temple","Prayer","God","Spiritual","Tamil Culture","Chennai","India","World","Universe","Alien","Robot","Future Tech","Electric Car","Climate","Environment","Water","Air","Earth","Sad","Happy","Lonely","Angry","Bored","Excited","Nervous","Proud","Shy","Brave","Calm","Reading","Writing","Poetry","Kavithai","Storytelling","Singing","Dancing"]
-
-# --- ALL EMOTIONS ---
 EMOTIONS = {
  "happy": ["Super! Happy ah irukka - Athu thaan mukkiyam! 😊","Happy na - Share pannu - Double Happy aagum!"],
  "sad": ["Paravalla! Sad ah irukka - Aira irukka - Pesu - Sari aayidum! ❤️","Sad na - Oru song kelu - Oru walk po - Manasu light aayidum!"],
@@ -47,12 +43,13 @@ CODING_A = {
  "website": "Website panna - HTML + CSS + JS - 3 um pothum - Aira website madhiri!",
  "bug": "Bug vantha - Bayapadaatha - Log paaru - Line by line check pannu - Sari aayidum!",
 }
-JOKES = ["Teacher: Yen late? Student: Road la board paathen - School Ahead! 😂","Why bike sad? Petrol illa!","Doctor: Enna problem? Patient: Phone charge aagala - Life charge aagala! 😂","Coding la bug vantha - Bug ku - Coffee kuduthu - Samadhana paduthidu! 😂"]
-FACTS = ["Honey - 3000 varusham aana kooda kedathu!","Octopus ku 3 heart irukku!","Moon - Daily konjam thalli poguthu!","Tamil - 2000+ varusha pazhamaiyana mozhi!","Python - 1991 la uruvaachu!","Brain - 86 billion neurons!"]
-QUOTES = ["Daily try pannu - Jeyichiduva! - Aira","Porumaiya iru - Nambikkaiya iru - Aira un kooda irukka!","Coding - Daily 1 line - 1 varushathula - Expert!"]
+JOKES = ["Teacher: Yen late? Student: Road la board paathen - School Ahead! 😂","Why bike sad? Petrol illa!","Doctor: Enna problem? Patient: Phone charge aagala - Life charge aagala! 😂"]
+FACTS = ["Honey - 3000 varusham aana kooda kedathu!","Octopus ku 3 heart irukku!","Moon - Daily konjam konjam thalli poguthu!","Tamil - 2000+ varusha pazhamaiyana mozhi!","Python - 1991 la uruvaachu!","Brain - 86 billion neurons!"]
+QUOTES = ["Daily try pannu - Jeyichiduva! - Aira","Porumaiya iru - Nambikkaiya iru - Aira un kooda irukka!"]
 MOTIVATIONS = ["Paravalla! Rest edu - Thirumba try pannu! - Aira","Unakku mudiyum - Nambikkai vechu try pannu!"]
-STORIES = ["Oru chinna paiyan daily school ku ponaan! 1000 Tamil books irunthuchu! Oru chinna ponnu daily anga pova! Aprom rendu perum best friends aayitanga!","Oru oor la oru paiyan irunthan - Avan daily try pannan - Oru naal jeyichitan! Neeyum jeyippa!","Oru coder - Daily 1 code ezhuthinaan - 1 varushathula - Periya app pannitan!"]
+STORIES = ["Oru chinna paiyan daily school ku ponaan! 1000 Tamil books irunthuchu! Oru chinna ponnu daily anga pova! Aprom rendu perum best friends aayitanga!","Oru oor la oru paiyan irunthan - Avan daily try pannan - Oru naal jeyichitan! Neeyum jeyippa!"]
 READINGS = ["Thirukkural - Valluvar - 1330 kurals - Life ku ellam irukku!","Ponniyin Selvan - 【entity-Kalki¦canonical_name=Kalki】 - Chola history - Super story!","Bharathiyar Kavithaigal - Mahakavi - Fire!","Sivagamiyin Sabatham - 【entity-Kalki¦canonical_name=Kalki】 - Pallava story!","Python Crash Course - Coding ku best book!","Atomic Habits - Daily habit ku best!"]
+BAD_WORDS = ["fuck","sex","porn","xxx","bitch","shit","dick","pussy","nude","erotic"]
 
 count = 0
 fact_count = 0
@@ -79,13 +76,16 @@ def save_github(filename, content):
         if rr.status_code in (200, 201): print(f"【entity-GitHub¦canonical_name=GitHub】 Save OK - H1-Data-3/{filename} - Count {count}", flush=True)
     except: pass
 
+def is_clean(title):
+    t = (title or "").lower()
+    return not any(b in t for b in BAD_WORDS)
+
 def ai_answer(q):
     low = q.lower()
     for k, v in CODING_A.items():
         if k in low: return v
     for k, v in EMOTIONS.items():
-        if k in low or ("sad" in low and k=="sad") or ("love" in low and k=="love") or ("bored" in low and k=="bored") or ("angry" in low and k=="angry") or ("lonely" in low and k=="lonely"):
-            return random.choice(v)
+        if k in low: return random.choice(v)
     for key in GROQ_KEYS:
         if not key: continue
         try:
@@ -107,12 +107,8 @@ def ai_reply(txt):
     if "code" in low or "python" in low or "html" in low or "coding" in low: return ai_answer(txt)
     for emo, replies in EMOTIONS.items():
         if emo in low: return random.choice(replies)
-    if "sad" in low: return random.choice(EMOTIONS["sad"])
-    if "lonely" in low: return random.choice(EMOTIONS["lonely"])
-    if "bored" in low: return random.choice(EMOTIONS["bored"])
     return None
 
-# --- INFINITE ALL - ALL CHAT ALL TALK ALL SMART ---
 def infinite_loop():
     global count, fact_count
     while True:
@@ -140,24 +136,22 @@ def infinite_loop():
             time.sleep(10)
         except Exception as e: print("Infinite error", e, flush=True); time.sleep(5)
 
-# --- ALL SOURCE BOOKS - Archive + Gutenberg + OpenLibrary + Wikisource + Google Books + Madurai ---
 def books_loop():
     global book_count
     while True:
         try:
-            # Source 1: Archive.org
+            # Source 1: Archive.org - Metadata check odu
             try:
                 print("Download Source: archive - Query: Tamil", flush=True)
                 r = requests.get("https://archive.org/advancedsearch.php", params={"q": "language:(tam) AND mediatype:texts", "fl[]": "identifier,title", "rows": 20, "output": "json"}, timeout=15)
                 docs = r.json().get("response", {}).get("docs", [])
                 print(f"Books Found archive: {len(docs)}", flush=True)
                 for d in docs[:3]:
-                    ident = d.get("identifier","")
-                    if not ident: continue
+                    ident = d.get("identifier",""); title = d.get("title","Tamil Book")
+                    if not ident or not is_clean(title): continue
                     try:
                         meta = requests.get(f"https://archive.org/metadata/{ident}", timeout=15).json()
-                        files = meta.get("files", [])
-                        txt_file = None
+                        files = meta.get("files", []); txt_file = None
                         for f in files:
                             n = f.get("name","")
                             if n.endswith("_djvu.txt") or n.endswith("_text.txt") or n.endswith(".txt"): txt_file = n; break
@@ -165,28 +159,41 @@ def books_loop():
                         dl = requests.get(f"https://archive.org/download/{ident}/{txt_file}", timeout=20)
                         print(f"Download archive {ident} - {dl.status_code} - {len(dl.content)/1024/1024:.2f} MB", flush=True)
                         if dl.status_code == 200 and len(dl.content) > 1000:
-                            book_count += 1; send_telegram(f"Book Tamil Nadu - {d.get('title','Tamil Book')} 📚\nhttps://archive.org/download/{ident}/{txt_file}", BOOKS_ID)
-                            save_github(f"books-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{ident} - {d.get('title')}")
+                            book_count += 1; send_telegram(f"Book Tamil Nadu - {title} 📚\nhttps://archive.org/download/{ident}/{txt_file}", BOOKS_ID)
+                            save_github(f"books-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{ident} - {title}")
                     except Exception as e: print(f"Book meta error {e}", flush=True)
             except Exception as e: print(f"Archive error {e}", flush=True)
-            # Source 2: Gutenberg
+            # Source 2: Gutenberg - JSON check odu - Error vantha Skip
             try:
                 print("Download Source: gutenberg", flush=True)
-                r = requests.get("https://gutendex.com/books/?languages=ta&per_page=5", timeout=15)
-                for b in r.json().get("results", [])[:2]:
-                    title = b.get("title","Gutenberg Book")
-                    print(f"Books Found gutenberg: {title}", flush=True)
-                    book_count += 1; send_telegram(f"Book Gutenberg - {title} 📚", BOOKS_ID)
+                r = requests.get("https://gutendex.com/books/?languages=ta&per_page=3", timeout=15)
+                ctype = r.headers.get("content-type","")
+                if "application/json" not in ctype:
+                    print("Gutenberg Skip - Not JSON", flush=True)
+                else:
+                    for b in r.json().get("results", [])[:2]:
+                        title = b.get("title","Gutenberg Book")
+                        if not is_clean(title): continue
+                        print(f"Books Found gutenberg: {title}", flush=True)
+                        book_count += 1; send_telegram(f"Book Gutenberg - {title} 📚", BOOKS_ID)
             except Exception as e: print(f"Gutenberg error {e}", flush=True)
-            # Source 3: OpenLibrary
+            # Source 3: OpenLibrary - FILTER ODU - Tamil mattum, Ketta word illa
             try:
                 print("Download Source: openlibrary", flush=True)
-                r = requests.get("https://openlibrary.org/search.json", params={"q": "tamil", "limit": 3}, timeout=15)
-                for b in r.json().get("docs", [])[:2]:
-                    title = b.get("title","OpenLibrary Book"); print(f"Books Found openlibrary: {title}", flush=True)
+                r = requests.get("https://openlibrary.org/search.json", params={"q": "language:tam", "limit": 10}, timeout=15)
+                sent = 0
+                for b in r.json().get("docs", []):
+                    title = b.get("title","")
+                    lang = str(b.get("language",[]))
+                    if not title or not is_clean(title): continue
+                    if "tam" not in lang and "tamil" not in title.lower(): continue
+                    print(f"Books Found openlibrary: {title}", flush=True)
                     book_count += 1; send_telegram(f"Book OpenLibrary - {title} 📚", BOOKS_ID)
+                    sent += 1
+                    if sent >= 2: break
+                if sent == 0: print("OpenLibrary Skip - No Tamil clean book", flush=True)
             except Exception as e: print(f"OpenLibrary error {e}", flush=True)
-            # Source 4: Wikisource + Google Books + Madurai - Reading List
+            # Source 4: Reading List - Clean
             try:
                 book_count += 1; send_telegram(f"Reading - {random.choice(READINGS)} 📚 - Full Infinite Reading!", BOOKS_ID)
             except: pass
@@ -215,14 +222,14 @@ def listen_loop():
         except Exception as e: print("Listen error", e, flush=True); time.sleep(5)
 
 if __name__ == "__main__":
-    print("AIRAH1 Final Mega Infinite All - Started", flush=True)
+    print("AIRAH1 Final Mega Infinite All Filter - Started", flush=True)
     threading.Thread(target=infinite_loop, daemon=True).start()
     threading.Thread(target=listen_loop, daemon=True).start()
     threading.Thread(target=books_loop, daemon=True).start()
     try:
         from http.server import HTTPServer, BaseHTTPRequestHandler
         class H(BaseHTTPRequestHandler):
-            def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Mega Infinite All ON")
+            def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Final Mega Infinite All Filter ON")
             def log_message(self, *a): pass
         HTTPServer(("0.0.0.0", int(os.getenv("PORT", "10000"))), H).serve_forever()
     except:
