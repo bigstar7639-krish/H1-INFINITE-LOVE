@@ -17,7 +17,6 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 BOT_TOKEN_2 = os.environ.get("BOT_TOKEN_2", "")
 GROUP_ID = "-1003935111481"
 CHANNEL_ID = "-1003940504242"
-# 5 Keys - Groq 3 + Gemini 2
 GROQ_1 = os.environ.get("GROQ_API_KEY", "")
 GROQ_2 = os.environ.get("GROQ_API_KEY_2", "")
 GROQ_3 = os.environ.get("GROQ_API_KEY_3", "")
@@ -33,39 +32,39 @@ def send_msg(token, text):
     except:
         pass
 
-# ===== AI BRAIN - 5 Keys Rotate =====
+# ===== AI BRAIN - NEW MODELS - 404 FIX =====
 def ai_answer(question):
-    # Groq 1,2,3
+    # Groq - NEW MODEL llama-3.3-70b-versatile
     for key, name in [(GROQ_1, "Groq1"), (GROQ_2, "Groq2"), (GROQ_3, "Groq3")]:
         if not key:
             continue
         try:
             r = requests.post("https://api.groq.com/openai/v1/chat/completions",
                 headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                json={"model": "llama-3.1-8b-instant", "messages": [{"role": "system", "content": "Ne Aira H1, Tamil + English la pesura cute friend. Tamil la Tanglish la short ah, anba, funny ah answer pannu. 2-3 lines mattum."}, {"role": "user", "content": question}]},
+                json={"model": "llama-3.3-70b-versatile", "messages": [{"role": "system", "content": "Ne Aira H1, Tamil Tanglish la pesura cute friend. Short ah 2-3 lines la anba answer pannu."}, {"role": "user", "content": question}]},
                 timeout=20)
             if r.status_code == 200:
                 ans = r.json()['choices'][0]['message']['content']
                 print(f"AI Answer - {name} - OK")
                 return ans[:500]
             else:
-                print(f"AI Fail {name} - {r.status_code}")
+                print(f"AI Fail {name} - {r.status_code} - {r.text[:100]}")
         except Exception as e:
             print(f"AI Error {name} - {e}")
             continue
-    # Gemini 1,2
+    # Gemini - NEW MODEL gemini-2.0-flash
     for key, name in [(GEMINI_1, "Gemini1"), (GEMINI_2, "Gemini2")]:
         if not key:
             continue
         try:
-            r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}",
+            r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}",
                 json={"contents": [{"parts": [{"text": f"Ne Aira H1, Tamil Tanglish la cute friend. Short ah 2-3 lines la answer pannu. Question: {question}"}]}]}, timeout=20)
             if r.status_code == 200:
                 ans = r.json()['candidates'][0]['content']['parts'][0]['text']
                 print(f"AI Answer - {name} - OK")
                 return ans[:500]
             else:
-                print(f"AI Fail {name} - {r.status_code}")
+                print(f"AI Fail {name} - {r.status_code} - {r.text[:100]}")
         except Exception as e:
             print(f"AI Error {name} - {e}")
             continue
@@ -85,7 +84,7 @@ Q_TEMPLATES = ["{topic} na enna?", "{topic} pathi sollu", "{topic} la enna speci
 AI_QUESTIONS = ["Kadhal na enna?", "Life la jeyikka enna pannanum?", "Sad ah irukkum pothu enna pannanum?", "Tamil mozhi yen special?", "Thirukkural la enna solirukku?", "Friendship ah eppadi kaapathurathu?", "Dream ah eppadi achieve pannanum?", "Bayam ah eppadi poganum?"]
 
 def auto_infinite():
-    print("All Infinite Start! AI Brain 5 Keys ON!")
+    print("All Infinite Start! AI Brain 5 Keys ON! New Models!")
     count = 0
     while True:
         count += 1
@@ -131,7 +130,8 @@ def auto_infinite():
         time.sleep(10)
 threading.Thread(target=auto_infinite, daemon=True).start()
 
-QUERIES = ["Thirukkural", "Bharathiyar", "Kavithai", "Tamil", "Novel", "Kural", "Padal", "History", "Kamban", "Avvaiyar", "Vallalar", "Tholkappiyam"]
+# BOOKS - Broad Query Fix - 0 Varathu!
+QUERIES = ["Tamil", "Tamil", "Tamil", "Bharathiyar", "Thirukkural", "Kavithai"]
 def send_book_file(filename, content, caption):
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
@@ -139,62 +139,96 @@ def send_book_file(filename, content, caption):
         data = {'chat_id': CHANNEL_ID, 'caption': caption[:200]}
         pr = requests.post(url, files=files, data=data, timeout=60)
         return pr.status_code
-    except Exception as e:
-        print(f"Send Book Error - {e}")
+    except:
         return 0
 def is_bad_ident(ident):
     low = ident.lower()
     return any(x in low for x in ["zim", " wikipedia", "wikibooks", "wikiquote", "wikinews"])
 def fetch_archive(q, pg):
-    books = []
-    q_full = f"{q} AND language:(tamil) AND mediatype:texts"
-    q_enc = urllib.parse.quote(q_full)
-    r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg}&output=json", timeout=30)
-    for d in r.json()['response']['docs']:
-        books.append((d['identifier'], d.get('title',''), "archive"))
-    return books
+    try:
+        # Broad - language mattum - Query specific illa - 0 varaathu!
+        q_full = "language:(tamil) AND mediatype:texts"
+        q_enc = urllib.parse.quote(q_full)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg}&output=json", headers=headers, timeout=30)
+        if r.status_code != 200:
+            return []
+        books = []
+        for d in r.json()['response']['docs']:
+            books.append((d['identifier'], d.get('title',''), "archive"))
+        return books
+    except:
+        return []
 def fetch_gutenberg(q, pg):
-    books = []
-    lang = "ta" if random.random() < 0.5 else "en"
-    r = requests.get(f"https://gutendex.com/books/?languages={lang}&search={urllib.parse.quote(q)}&page={pg}", timeout=20)
-    for b in r.json().get('results', [])[:10]:
-        books.append((str(b['id']), b['title'], "gutenberg"))
-    return books
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(f"https://gutendex.com/books/?languages=en&page=1", headers=headers, timeout=20)
+        if r.status_code != 200:
+            print(f"Gutenberg Skip - Status {r.status_code}")
+            return []
+        books = []
+        for b in r.json().get('results', [])[:10]:
+            books.append((str(b['id']), b['title'], "gutenberg"))
+        return books
+    except Exception as e:
+        print(f"Gutenberg Error - {e}")
+        return []
 def fetch_openlibrary(q, pg):
-    books = []
-    r = requests.get(f"https://openlibrary.org/search.json?q={urllib.parse.quote(q)}+language:tam&limit=20&page={pg}", timeout=20)
-    for b in r.json().get('docs', [])[:10]:
-        ia = b.get('ia', [])
-        if ia:
-            books.append((ia[0], b.get('title',''), "archive"))
-        else:
-            books.append((b.get('key','').replace('/works/',''), b.get('title',''), "openlibrary"))
-    return books
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(f"https://openlibrary.org/search.json?q=Tamil&limit=20&page={pg}", headers=headers, timeout=20)
+        if r.status_code != 200:
+            return []
+        books = []
+        for b in r.json().get('docs', [])[:10]:
+            ia = b.get('ia', [])
+            if ia:
+                books.append((ia[0], b.get('title',''), "archive"))
+            else:
+                books.append((b.get('key','').replace('/works/',''), b.get('title',''), "openlibrary"))
+        return books
+    except:
+        return []
 def fetch_wikisource(q, pg):
-    books = []
-    r = requests.get(f"https://ta.wikisource.org/w/api.php?action=query&list=search&srsearch={urllib.parse.quote(q)}&format=json&srlimit=20&sroffset={(pg-1)*20}", timeout=20)
-    for d in r.json().get('query', {}).get('search', []):
-        books.append((d['title'].replace(' ', '_'), d['title'], "wikisource"))
-    return books
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 AiraBot/1.0"}
+        r = requests.get(f"https://ta.wikisource.org/w/api.php?action=query&list=search&srsearch=Tamil&format=json&srlimit=20", headers=headers, timeout=20)
+        if r.status_code != 200:
+            return []
+        books = []
+        for d in r.json().get('query', {}).get('search', []):
+            books.append((d['title'].replace(' ', '_'), d['title'], "wikisource"))
+        return books
+    except:
+        return []
 def fetch_google_books(q, pg):
-    books = []
-    start = (pg-1)*10
-    r = requests.get(f"https://www.googleapis.com/books/v1/volumes?q={urllib.parse.quote(q)}+lang:ta&startIndex={start}&maxResults=10", timeout=20)
-    for item in r.json().get('items', []):
-        books.append((item['id'], item.get('volumeInfo', {}).get('title',''), "googlebooks"))
-    return books
+    try:
+        start = (pg-1)*10
+        r = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=Tamil&startIndex={start}&maxResults=10", timeout=20)
+        if r.status_code != 200:
+            return []
+        books = []
+        for item in r.json().get('items', []):
+            books.append((item['id'], item.get('volumeInfo', {}).get('title',''), "googlebooks"))
+        return books
+    except:
+        return []
 def fetch_madurai(q, pg):
-    books = []
-    q_full = f"{q} AND collection:(projectmadurai OR opensource) AND language:(tamil)"
-    q_enc = urllib.parse.quote(q_full)
-    r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg}&output=json", timeout=30)
-    for d in r.json()['response']['docs']:
-        books.append((d['identifier'], d.get('title',''), "archive"))
-    return books
+    try:
+        q_full = "language:(tamil) AND mediatype:texts"
+        q_enc = urllib.parse.quote(q_full)
+        r = requests.get(f"https://archive.org/advancedsearch.php?q={q_enc}&fl[]=identifier,title&rows=20&page={pg+10}&output=json", timeout=30)
+        if r.status_code != 200:
+            return []
+        books = []
+        for d in r.json()['response']['docs']:
+            books.append((d['identifier'], d.get('title',''), "archive"))
+        return books
+    except:
+        return []
 SOURCES = ["archive", "gutenberg", "openlibrary", "wikisource", "googlebooks", "madurai"]
 def download_one(ident, title, typ, done):
     if is_bad_ident(ident):
-        print(f"Skip ZIM {ident}")
         return False
     if ident in done:
         return False
@@ -212,7 +246,6 @@ def download_one(ident, title, typ, done):
                     if f.get('name','').endswith('_text.txt'):
                         txt = f['name']; break
             if not txt:
-                print(f"Skip No TXT {ident}")
                 done.add(ident); return False
             tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
             content = tr.text.encode('utf-8')
@@ -224,7 +257,6 @@ def download_one(ident, title, typ, done):
                         content = tr.content; break
                 except: continue
             if not content:
-                print(f"Skip Gutenberg No TXT {ident}")
                 done.add(ident); return False
         elif typ == "wikisource":
             r = requests.get(f"https://ta.wikisource.org/w/api.php?action=query&prop=extracts&explaintext=1&titles={urllib.parse.quote(ident)}&format=json", timeout=20)
@@ -233,26 +265,22 @@ def download_one(ident, title, typ, done):
             for p in pages.values():
                 txt = p.get('extract','')
             if not txt or len(txt) < 1000:
-                print(f"Skip Wikisource Small {ident}")
                 done.add(ident); return False
             content = txt.encode('utf-8')
         elif typ == "googlebooks":
             r = requests.get(f"https://www.googleapis.com/books/v1/volumes/{ident}", timeout=20)
             info = r.json().get('volumeInfo', {})
-            txt = f"Title: {info.get('title','')}\nAuthors: {','.join(info.get('authors',[]))}\n\n{info.get('description','')}\n\nCategories: {','.join(info.get('categories',[]))}\nPublished: {info.get('publishedDate','')}"
+            txt = f"Title: {info.get('title','')}\nAuthors: {','.join(info.get('authors',[]))}\n\n{info.get('description','')}"
             if len(txt) < 500:
-                print(f"Skip GoogleBooks Small {ident}")
                 done.add(ident); return False
             content = txt.encode('utf-8')
             fname = f"{ident}-googlebooks.txt"
         elif typ == "openlibrary":
-            print(f"Skip OpenLibrary No Direct TXT {ident}")
             done.add(ident); return False
         else:
             return False
         size = len(content)/(1024*1024)
         if size < 0.02:
-            print(f"Skip Small {ident} - {size:.2f} MB")
             done.add(ident); return False
         code = send_book_file(fname, content, f"📖 {title[:40]} - {typ}")
         print(f"Download {typ} {ident} - {code} - {size:.2f} MB")
@@ -266,14 +294,14 @@ def auto_download():
     print("All Book Source Infinite Start! All Free Sources!")
     done = set()
     src_idx = 0
-    q_idx = 0
+    pg_counter = 1
     while True:
         try:
             src = SOURCES[src_idx % len(SOURCES)]
             src_idx += 1
-            q = QUERIES[q_idx % len(QUERIES)]
-            q_idx += 1
-            pg = random.randint(1, 5)
+            pg_counter += 1
+            pg = random.randint(1, 20)
+            q = QUERIES[src_idx % len(QUERIES)]
             print(f"Download Source: {src} - Query: {q} - Page {pg}")
             books = []
             try:
@@ -299,6 +327,6 @@ def auto_download():
         time.sleep(10)
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON! 5 Keys AI Brain + All Free Sources!")
+print("Aira FINAL All Infinite ON! New Models + Broad Books!")
 while True:
     time.sleep(60)
