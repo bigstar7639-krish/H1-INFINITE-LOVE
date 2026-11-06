@@ -114,27 +114,37 @@ def auto_download():
             src = sources[src_idx % len(sources)]
             src_idx += 1
             page += 1
-            print(f"Download Source: {src} - Page {page}")
+            # Random Page - New Books!
+            start = random.randint(0, 2000)
+            print(f"Download Source: {src} - Page {page} - Start {start}")
             books = []
             if src == "gutenberg":
-                pg = (page % 10) + 1
-                r = requests.get(f"https://gutendex.com/books/?languages=ta&page={pg}", timeout=30)
-                for b in r.json().get('results', [])[:10]:
-                    books.append((str(b['id']), b['title'], "gutenberg"))
+                pg = random.randint(1, 20)
+                try:
+                    r = requests.get(f"https://gutendex.com/books/?languages=ta&page={pg}", timeout=20)
+                    for b in r.json().get('results', [])[:10]:
+                        books.append((str(b['id']), b['title'], "gutenberg"))
+                except:
+                    print(f"Gutenberg Skip - Next Source")
+                    continue
             elif src == "openlibrary":
-                pg = (page % 10) + 1
-                r = requests.get(f"https://openlibrary.org/search.json?q=language:tam&limit=20&page={pg}", timeout=30)
-                for b in r.json().get('docs', [])[:10]:
-                    key = b.get('key','').replace('/works/','')
-                    books.append((key, b.get('title',''), "openlibrary"))
+                pg = random.randint(1, 20)
+                try:
+                    r = requests.get(f"https://openlibrary.org/search.json?q=language:tam&limit=20&page={pg}", timeout=20)
+                    for b in r.json().get('docs', [])[:10]:
+                        key = b.get('key','').replace('/works/','')
+                        books.append((key, b.get('title',''), "openlibrary"))
+                except:
+                    continue
             else:
-                start = (page % 20) * 50
                 r = requests.get(f"https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=20&start={start}&output=json", timeout=30)
                 for d in r.json()['response']['docs']:
                     books.append((d['identifier'], d.get('title',''), "archive"))
             print(f"Books Found {src}: {len(books)}")
+            new_count = 0
             for ident, title, typ in books:
                 if ident in done:
+                    print(f"Skip Already Done {ident}")
                     continue
                 try:
                     content = None
@@ -146,6 +156,8 @@ def auto_download():
                                 txt = f['name']
                                 break
                         if not txt:
+                            print(f"Skip No TXT {ident}")
+                            done.add(ident)
                             continue
                         tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
                         content = tr.text.encode('utf-8')
@@ -153,11 +165,15 @@ def auto_download():
                         tr = requests.get(f"https://www.gutenberg.org/files/{ident}/{ident}-0.txt", timeout=30)
                         content = tr.content
                     else:
+                        print(f"Skip OpenLibrary {ident} - No Direct TXT")
+                        done.add(ident)
                         continue
                     if not content:
                         continue
                     size = len(content)/(1024*1024)
                     if size < 0.05:
+                        print(f"Skip Small {ident} - {size:.2f} MB")
+                        done.add(ident)
                         continue
                     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
                     files = {'document': (f"{ident}.txt", content)}
@@ -166,19 +182,20 @@ def auto_download():
                     print(f"Download {src} {ident} - {pr.status_code} - {size:.2f} MB")
                     if pr.status_code == 200:
                         done.add(ident)
+                        new_count += 1
                 except Exception as e:
-                    print(f"One Book Error {src} - {e}")
+                    print(f"One Book Error {src} {ident} - {e}")
                     continue
-                time.sleep(3)
+                time.sleep(2)
+            print(f"Batch Done - New {new_count} - 10 sec wait...")
         except Exception as e:
             print(f"Download Main Error - {e}")
             time.sleep(10)
             continue
-        print("Batch Done - 10 sec wait...")
         time.sleep(10)
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON!")
+print("Aira FINAL All Infinite ON! New Books Fix!")
 while True:
     time.sleep(60)
