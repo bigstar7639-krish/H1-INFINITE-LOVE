@@ -1,5 +1,5 @@
 # AIRAH1 - FINAL - Infinite Category + Infinite Image + Infinite Source + Infinite Repo + Infinite Loop
-# File: aira_worker.py - Worker 2 Bots + Main Data
+# File: aira_worker.py - Minus Fix + Wikimedia Fix Odu!
 import os, time, threading, requests, base64, random
 from datetime import datetime
 
@@ -7,7 +7,16 @@ BOT1_TOKEN = os.getenv("BOT1_TOKEN","")
 BOT2_TOKEN = os.getenv("BOT2_TOKEN","")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN","")
 GITHUB_USER = "bigstar7639-krish"
-DATA_CHANNEL = os.getenv("DATA_CHANNEL","-1004366479419")
+
+# CHANNEL ID FIX - Minus Pona Kooda - Auto Fix!
+def fix_id(v, default):
+    v = (v or default).strip()
+    if not v: return default
+    if v.startswith("-"): return v
+    if v.startswith("100"): return "-" + v
+    return "-100" + v
+
+DATA_CHANNEL = fix_id(os.getenv("DATA_CHANNEL",""), "-1004366479419")
 print(f"Worker Start - Bot1 OK? {bool(BOT1_TOKEN)} Bot2 OK? {bool(BOT2_TOKEN)} Channel: {DATA_CHANNEL}", flush=True)
 
 # INFINITE REPO + LOCK
@@ -50,7 +59,7 @@ def save_github(filename, content):
                 rr = requests.put(url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, json=payload, timeout=15)
                 if rr.status_code in (200,201):
                     REPO_COUNT[0]+=1
-                    print(f"Worker GitHub Save OK - {repo}/{filename} - Repo {REPO_COUNT[0]}/{MAX_PER_REPO}", flush=True)
+                    print(f"Worker 【entity-GitHub¦canonical_name=GitHub】 Save OK - {repo}/{filename} - Repo {REPO_COUNT[0]}/{MAX_PER_REPO}", flush=True)
                     return True
                 if rr.status_code in (409,422):
                     print(f"Worker Save Retry {rr.status_code} - Try {attempt+1}/3", flush=True); time.sleep(1); continue
@@ -59,10 +68,7 @@ def save_github(filename, content):
             except Exception as e: print(f"Worker Save Error {e}", flush=True); time.sleep(1); continue
         return False
 
-# INFINITE CATEGORY - Infinite List - Ne Add Panna Mudiyum!
 BASE_CATS = ["Tamil","Love","God","Nature","Cat","Dog","Food","Cricket","Space","Story","Health","Music","Movie","Temple","Flower","Sea","Mountain","River","Sky","Star","Moon","Sun","Bird","Animal","Baby","Teacher","Student","Business","Money","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Game","Sport","Football","Science","History","Culture","Festival","Marriage","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Kindness","Truth","Wisdom","Power","Magic","Luck","Destiny","Karma","Rain","Village","City","Chennai","Madurai","Delhi","Mumbai","London","Paris","Tokyo","New York","Egypt","Pyramids","Taj Mahal","Eiffel Tower","Psychology","Philosophy","Economics","Politics","Law","Education","Happiness","Smile","Heart","Future","Freedom","Hope","Faith"]
-# INFINITE SOURCE - Infinite Source List!
-SOURCES = ["wikimedia","unsplash","openlibrary","archive","【entity-wikipedia¦canonical_name=Wikipedia】","googlebooks","gutenberg"]
 
 def send_to_channel(text, bot_token, bot_name="Worker"):
     if not bot_token or not DATA_CHANNEL: return False
@@ -72,13 +78,12 @@ def send_to_channel(text, bot_token, bot_name="Worker"):
             print(f"Worker Send: {r.status_code} to Data Channel - {bot_name}", flush=True)
             if r.status_code==200: return True
             if r.status_code==400:
-                print(f"Worker Send 400 - Check Admin + Permission + Token - {bot_name} - {r.text[:200]}", flush=True)
+                print(f"Worker Send 400 - {bot_name} - {r.text[:200]}", flush=True)
                 time.sleep(2); continue
             time.sleep(1)
         except Exception as e: print(f"Worker Send Error {e}", flush=True); time.sleep(2)
     return False
 
-# BOT 1 - INFINITE IMAGE - Infinite Category + Infinite Source!
 def bot1_image_worker():
     idx = 0
     while True:
@@ -86,23 +91,27 @@ def bot1_image_worker():
             cat = BASE_CATS[idx % len(BASE_CATS)]; idx += 1
             print(f"Bot1 - Infinite Image - Category: {cat} - Batch {idx} - Repo {CURRENT_REPO[0]}", flush=True)
             count = 0
-            # SOURCE 1 - Wikimedia - Free - No Key!
+            # SOURCE 1 - Wikimedia - Fix Odu - JSON Check!
             try:
                 print(f"Source: wikimedia - Query: {cat}", flush=True)
-                r = requests.get("https://commons.wikimedia.org/w/api.php", params={"action":"query","format":"json","generator":"search","gsrsearch":cat,"gsrnamespace":6,"gsrlimit":20,"prop":"imageinfo","iiprop":"url"}, headers={"User-Agent": "AIRAH1-Bot/1.0 (Tamil Books)"}, timeout=20)
-                if "application/json" in r.headers.get("content-type",""):
-                    for page in r.json().get("query",{}).get("pages",{}).values():
-                        url = page.get("imageinfo",[{}])[0].get("url","")
-                        if url:
-                            count+=1
-                            send_to_channel(f"Auto Image - {cat} - {count}/100 📸\n{url}", BOT1_TOKEN, "Bot1-Image")
-                            save_github(f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {url}")
-                            time.sleep(1)
-                            if count>=20: break
+                r = requests.get("https://commons.wikimedia.org/w/api.php", params={"action":"query","format":"json","list":"search","srsearch":cat,"srnamespace":6,"srlimit":10}, headers={"User-Agent": "AIRAH1-Bot/1.0 (Tamil Books)"}, timeout=20)
+                ctype = r.headers.get("content-type","")
+                if "application/json" not in ctype:
+                    print("Wikimedia Skip - Not JSON - Next Source!", flush=True)
                 else:
-                    print("Wikimedia Skip - Not JSON", flush=True)
-            except Exception as e: print(f"Wikimedia Error {e}", flush=True)
-            # SOURCE 2 - Pollinations - Image Generation - Free - No Key!
+                    try:
+                        data = r.json()
+                        for item in data.get("query",{}).get("search",[])[:5]:
+                            title = item.get("title","")
+                            if title:
+                                url = f"https://commons.wikimedia.org/wiki/{title.replace(' ','_')}"
+                                count+=1
+                                send_to_channel(f"Auto Image - {cat} - {count}/100 📸\n{url}", BOT1_TOKEN, "Bot1-Image")
+                                save_github(f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {url}")
+                                time.sleep(1)
+                    except Exception as e: print(f"Wikimedia JSON Error {e} - Skip!", flush=True)
+            except Exception as e: print(f"Wikimedia Error {e} - Skip!", flush=True)
+            # SOURCE 2 - Pollinations - Generate - Free!
             try:
                 print(f"Source: pollinations - Generate: {cat}", flush=True)
                 prompt = f"{cat}, Tamil style, cute, colourful, beautiful, Aira style"
@@ -112,7 +121,7 @@ def bot1_image_worker():
                 send_to_channel(f"Auto Image Generate - {cat} - Aira Style 🎨\n{url}", BOT1_TOKEN, "Bot1-Generate")
                 save_github(f"images-generate-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {url}")
             except Exception as e: print(f"Pollinations Error {e}", flush=True)
-            # SOURCE 3 - Unsplash Source - Free - No Key!
+            # SOURCE 3 - Unsplash Source!
             try:
                 print(f"Source: unsplash - Query: {cat}", flush=True)
                 url = f"https://source.unsplash.com/800x600/?{cat}"
@@ -124,14 +133,12 @@ def bot1_image_worker():
             time.sleep(60)
         except Exception as e: print(f"Bot1 Error {e}", flush=True); time.sleep(30)
 
-# BOT 2 - INFINITE KNOWLEDGE + BOOKS - Infinite Category + Infinite Source!
 def bot2_knowledge_worker():
     idx = 0
     while True:
         try:
             topic = BASE_CATS[idx % len(BASE_CATS)]; idx += 1
             print(f"Bot2 - Infinite Knowledge - Topic: {topic} - Batch {idx}", flush=True)
-            # SOURCE 1 - 【entity-Wikipedia¦canonical_name=Wikipedia】!
             try:
                 r = requests.get(f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic.replace(' ','_')}", headers={"User-Agent": "AIRAH1-Bot/1.0"}, timeout=10)
                 if r.status_code==200:
@@ -140,7 +147,6 @@ def bot2_knowledge_worker():
                         send_to_channel(f"Auto Knowledge - {topic} 🧠\n{ex}", BOT2_TOKEN, "Bot2-Wiki")
                         save_github(f"knowledge-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {ex}")
             except Exception as e: print(f"Wiki Error {e}", flush=True)
-            # SOURCE 2 - OpenLibrary Books!
             try:
                 r = requests.get("https://openlibrary.org/search.json", params={"q":topic,"limit":5}, timeout=10)
                 for b in r.json().get("docs",[])[:3]:
@@ -149,7 +155,6 @@ def bot2_knowledge_worker():
                         send_to_channel(f"Auto Book - {topic} - {title} 📚", BOT2_TOKEN, "Bot2-Book")
                         save_github(f"books-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {title}")
             except Exception as e: print(f"OpenLibrary Error {e}", flush=True)
-            # SOURCE 3 - Archive.org Books!
             try:
                 r = requests.get("https://archive.org/advancedsearch.php", params={"q":f"title:({topic}) AND mediatype:texts","fl[]":"identifier,title","rows":5,"output":"json"}, timeout=15)
                 for d in r.json().get("response",{}).get("docs",[])[:2]:
@@ -158,7 +163,6 @@ def bot2_knowledge_worker():
                         send_to_channel(f"Auto Book Archive - {topic} - {title} 📚\nhttps://archive.org/details/{ident}", BOT2_TOKEN, "Bot2-Archive")
                         save_github(f"books-archive-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {ident} - {title}")
             except Exception as e: print(f"Archive Error {e}", flush=True)
-            # SOURCE 4 - Trivia Quiz!
             try:
                 r = requests.get("https://opentdb.com/api.php", params={"amount":1,"type":"multiple"}, timeout=10)
                 if r.status_code==200:
@@ -171,7 +175,6 @@ def bot2_knowledge_worker():
             time.sleep(30)
         except Exception as e: print(f"Bot2 Error {e}", flush=True); time.sleep(30)
 
-# SELF-HEAL - Infinite Loop Check!
 def self_heal():
     while True:
         try:
