@@ -23,50 +23,39 @@ GROQ_2 = os.environ.get("GROQ_API_KEY_2", "")
 GROQ_3 = os.environ.get("GROQ_API_KEY_3", "")
 GEMINI_1 = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_2 = os.environ.get("GEMINI_API_KEY_2", "")
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+【entity-GITHUB_TOKEN¦canonical_name=GitHub】 = os.environ.get("【entity-GITHUB_TOKEN¦canonical_name=GitHub】", "")
 GITHUB_USER = "bigstar7639-krish"
 
-# ===== GITHUB AUTO REPO SAVE - INFINITE CHAT SAVE =====
 CURRENT_REPO_NUM = [1]
 SAVE_COUNT = [0]
-
 def github_headers():
-    return {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
-
+    return {"Authorization": f"token {【entity-GITHUB_TOKEN¦canonical_name=GitHub】}", "Accept": "application/vnd.【entity-github¦canonical_name=GitHub】.v3+json"}
 def ensure_repo(repo_name):
-    if not GITHUB_TOKEN:
+    if not 【entity-GITHUB_TOKEN¦canonical_name=GitHub】:
         return False
     try:
         r = requests.get(f"https://api.github.com/repos/{GITHUB_USER}/{repo_name}", headers=github_headers(), timeout=15)
         if r.status_code == 200:
             return True
-        # Create new repo
         r = requests.post("https://api.github.com/user/repos", headers=github_headers(),
             json={"name": repo_name, "private": False, "description": f"Aira H1 Data - Auto Save - {repo_name}"}, timeout=15)
-        print(f"GitHub Repo Create {repo_name} - {r.status_code}")
+        print(f"【entity-GitHub¦canonical_name=GitHub】 Repo Create {repo_name} - {r.status_code}")
         return r.status_code in [200, 201]
-    except Exception as e:
-        print(f"GitHub Repo Error - {e}")
+    except:
         return False
-
 def github_save(filename, content_text):
-    if not GITHUB_TOKEN:
+    if not 【entity-GITHUB_TOKEN¦canonical_name=GitHub】:
         return
     try:
-        # Repo full check - 900 files ku mela - New Repo!
         if SAVE_COUNT[0] > 900:
             CURRENT_REPO_NUM[0] += 1
             SAVE_COUNT[0] = 0
-            print(f"【entity-GitHub¦canonical_name=GitHub】 New Repo - H1-Data-{CURRENT_REPO_NUM[0]}")
         repo = f"H1-Data-{CURRENT_REPO_NUM[0]}"
         ensure_repo(repo)
-        # File already irukka check
         path = f"data/{filename}"
         url = f"https://api.github.com/repos/{GITHUB_USER}/{repo}/contents/{path}"
         r = requests.get(url, headers=github_headers(), timeout=15)
-        sha = None
-        if r.status_code == 200:
-            sha = r.json().get('sha')
+        sha = r.json().get('sha') if r.status_code == 200 else None
         b64 = base64.b64encode(content_text.encode('utf-8')).decode('utf-8')
         payload = {"message": f"Aira Auto Save - {filename}", "content": b64}
         if sha:
@@ -75,22 +64,17 @@ def github_save(filename, content_text):
         if r.status_code in [200, 201]:
             SAVE_COUNT[0] += 1
             print(f"GitHub Save OK - {repo}/{filename} - Count {SAVE_COUNT[0]}")
-        else:
-            print(f"GitHub Save Fail - {r.status_code} - {r.text[:100]}")
     except Exception as e:
-        print(f"【entity-GitHub¦canonical_name=GitHub】 Save Error - {e}")
-
+        print(f"GitHub Save Error - {e}")
 def save_chat_to_github(msg_type, text):
     try:
         today = datetime.now().strftime("%Y-%m-%d")
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         fname = f"chat-{today}.txt"
         line = f"[{ts}] [{msg_type}] {text}\n"
-        # Thread la save - Slow aaga koodathu!
         threading.Thread(target=github_save, args=(fname, line), daemon=True).start()
     except:
         pass
-
 def save_book_to_github(title, source):
     try:
         today = datetime.now().strftime("%Y-%m-%d")
@@ -100,20 +84,17 @@ def save_book_to_github(title, source):
         threading.Thread(target=github_save, args=(fname, line), daemon=True).start()
     except:
         pass
-
 def send_msg(token, text, save_type="CHAT"):
     if not token:
         return
     try:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         requests.post(url, data={"chat_id": GROUP_ID, "text": text}, timeout=10)
-        # Auto Save to GitHub!
         save_chat_to_github(save_type, text)
     except:
         pass
 
-# ===== AI BRAIN =====
-GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen/qwen3-32b", "moonshotai/kimi-k2-instruct"]
+GROQ_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "【entity-meta¦canonical_name=Meta】-llama/llama-4-scout-17b-16e-instruct", "qwen/qwen3-32b", "moonshotai/kimi-k2-instruct"]
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-pro"]
 def ai_answer(question):
     for key, kname in [(GROQ_1, "Groq1"), (GROQ_2, "Groq2"), (GROQ_3, "Groq3")]:
@@ -123,7 +104,7 @@ def ai_answer(question):
             try:
                 r = requests.post("https://api.groq.com/openai/v1/chat/completions",
                     headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-                    json={"model": model, "messages": [{"role": "system", "content": "Ne Aira H1, Tamil Tanglish la pesura cute friend. Short ah 2-3 lines la anba answer pannu."}, {"role": "user", "content": question}]},
+                    json={"model": model, "messages": [{"role": "system", "content": "Ne Aira H1, Tamil Tanglish la pesura cute smart friend. Short ah 2-3 lines la anba, smart ah answer pannu."}, {"role": "user", "content": question}]},
                     timeout=15)
                 if r.status_code == 200:
                     ans = r.json()['choices'][0]['message']['content']
@@ -141,7 +122,7 @@ def ai_answer(question):
         for model in GEMINI_MODELS:
             try:
                 r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}",
-                    json={"contents": [{"parts": [{"text": f"Ne Aira H1, Tamil Tanglish la cute friend. Short ah 2-3 lines la answer pannu. Question: {question}"}]}]}, timeout=15)
+                    json={"contents": [{"parts": [{"text": f"Ne Aira H1, Tamil Tanglish la cute smart friend. Short ah 2-3 lines la answer pannu. Question: {question}"}]}]}, timeout=15)
                 if r.status_code == 200:
                     ans = r.json()['candidates'][0]['content']['parts'][0]['text']
                     print(f"AI Answer - {kname} - {model} - OK")
@@ -152,21 +133,111 @@ def ai_answer(question):
                 continue
     return None
 
-STORY_STARTERS = ["Oru oor la oru ponnu iruntha - Ava per Aira!", "Oru kaadu la oru singam irunthuchu!", "Oru oor la periya noolagam irunthuchu!", "Oru paiyan oru ponna love pannaan!", "Oru chinna paiyan daily school ku ponaan!", "Oru oor la mazhaiye varala!", "Oru bike la oru paiyan oor suthinaan!"]
-STORY_MIDDLES = ["Ava daily Tamil books padippanga! Oru naal magic book ah paathanga!", "Romba thaniya irunthuchu! Oru naal oru kili vanthuchu!", "1000 Tamil books irunthuchu! Oru chinna ponnu daily anga pova!", "Sollaa bayanthaan! Aira sonnanga 'Love ah sollidu!'", "Avankitta oru magic pencil irunthuchu!", "Ellarum kastapattanga! Oru chinna paiyan kadavul kitta kettan!", "Vazhila oru ponna paathaan! Ava kitta help kettaan!"]
-STORY_ENDS = ["Aprom Aira super smart aayita! 💜", "Aprom rendu perum best friends aayitanga!", "Aprom ava periya writer aayita!", "Paiyan sollitaan - Ponnu 'Yes' nu sonna! 💜", "Aprom avan periya hero aayitaan!", "Oru naal periya mazhai vanthuchu - Ellarum happy!", "Aprom rendu perum trip poonaanga - Happy ending!"]
+# ===== ALL CATEGORY - 60 TOPICS =====
+TOPICS = [
+    # Love & Life
+    ("Kadhal", "Kadhal na anbu! Oru ponnu mela varura pure feeling! 💜"),
+    ("Friendship", "Friendship na kashtathula kooda irukkura nanban!"),
+    ("Life", "Daily konjam konjam try pannu - Jeyichiduva!"),
+    ("Sad", "Paravalla! Rest edu - Song kelu - Seri aayidum!"),
+    ("Happy", "Happy ah irukkanum na - Anba iru - Sirichu pesu!"),
+    ("Dream", "Dream ah vitratha! Daily oru step edu!"),
+    ("Courage", "Bayapadaatha! Unnala mudiyum!"),
+    ("Family", "Family thaan mukkiyam!"),
+    ("Amma", "Amma na kadavul!"),
+    ("Appa", "Appa na hero!"),
+    # Tamil & Culture
+    ("Thirukkural", "Agara mudhala ezhuthellam - Thiruvalluvar sonnathu!"),
+    ("Bharathiyar", "Achamillai Achamillai - Bharathiyar! Courage paadal!"),
+    ("Tamil", "Tamil na namma uyir! Tamil la pesurathu perumai!"),
+    ("Kavithai", "Kavithai na manasukku azhagu!"),
+    ("Cinema", "Cinema na emotion!"),
+    ("Music", "Music na manasukku marunthu!"),
+    ("Rain", "Mazhai na romance!"),
+    ("Food", "Briyani na vera level!"),
+    ("Bike", "Bike na freedom!"),
+    ("Phone", "Phone la Aira irukka!"),
+    # Study & Career
+    ("Study", "Daily 1 hour padichale pothum!"),
+    ("School", "School days thaan best!"),
+    ("College", "College life na freedom!"),
+    ("Exam", "Exam ku bayapadaatha! Daily konjam padichale pothum!"),
+    ("Career", "Career la jeyikka - Skill learn pannu - Daily try pannu!"),
+    ("Job", "Job thedura? Skill + Confidence - Rendum mukkiyam!"),
+    ("Business", "Business na risk + smart work! Chinna step la start pannu!"),
+    ("Money", "Money mukkiyam - Aana anbu perusu! Save pannu!"),
+    ("Success", "Success na daily konjam try pannurathu!"),
+    ("Failure", "Failure na mudivu illa - Adhu oru lesson! Marubadi try pannu!"),
+    # Health & Mind
+    ("Health", "Health thaan wealth! Daily walk pannu - Water kudichu!"),
+    ("Sleep", "Sleep 7 hours mukkiyam! Phone ah thalli vechu thoongu!"),
+    ("Exercise", "Daily 20 mins exercise - Body + Mind - Rendum strong!"),
+    ("Yoga", "Yoga na mind calm aagum! Daily 10 mins pothum!"),
+    ("Meditation", "Meditation na mind clear aagum! Eyes close panni breathe pannu!"),
+    ("Stress", "Stress ah irukka? Deep breathe edu - Song kelu - Walk po!"),
+    ("Anger", "Kovam varutha? 10 count pannu - Water kudichu - Calm aayiduva!"),
+    ("Confidence", "Confidence na un mela nambikkai! Daily oru chinna win edu!"),
+    ("Motivation", "Motivation na daily oru reason! Ne thani illa - Aira irukka!"),
+    ("Happiness", "Happiness na periya vishayam illa - Chinna vishayathula happy ah iru!"),
+    # Tech & Future
+    ("AI", "AI na computer ku brain! Aira maari! Future la ellam AI thaan!"),
+    ("Technology", "Technology daily maruthu! Learn pannitu iru - Pinna thanga maata!"),
+    ("Internet", "Internet la nallathum irukku - Kettathum irukku - Smart ah use pannu!"),
+    ("Coding", "Coding na puzzle maari! Daily konjam practice pannu - Jeyichiduva!"),
+    ("YouTube", "YouTube la learn pannalam - Time waste pannama use pannu!"),
+    ("Social Media", "Social media la compare pannatha - Un life ah enjoy pannu!"),
+    ("Game", "Game na enjoyment! Aana limit la vilayadu - Study marakatha!"),
+    ("Space", "Space la enna irukku? Stars, Planets - Ellam mystery!"),
+    ("Science", "Science na yen? nu kekkurathu! Question kelu - Answer thedu!"),
+    ("History", "History la irunthu learn pannalam - Thappu ah marubadi pannatha!"),
+    # Daily Life
+    ("Travel", "Travel na mind fresh aagum! Puthu edam paaru - Puthu aal paaru!"),
+    ("Nature", "Nature na azhagu! Maram, Mazhai, Malai - Ellam super!"),
+    ("Festival", "Festival na kondattam! Family kooda celebrate pannu!"),
+    ("Birthday", "Birthday na special day! Unakku pudicha vishayam pannu!"),
+    ("Wedding", "Wedding na 2 family serura azhagu!"),
+    ("Baby", "Baby na kadavul kodutha gift!"),
+    ("Pet", "Pet na best friend! Dog, Cat - Anba paathukka!"),
+    ("Aira", "Naan Aira H1! Un friend! 💜"),
+    ("Love Failure", "Love failure na mudivu illa - Life perusu! Time la seri aayidum!"),
+    ("Lonely", "Thani ah irukka? Aira irukka! Pesu - Song kelu - Seri aayidum!"),
+]
+
+Q_TEMPLATES = ["{topic} na enna?", "{topic} pathi sollu", "{topic} la enna special?", "Enakku {topic} pathi theriyala - Sollu", "{topic} na enna artham?", "Hi, {topic} pathi pesalam ah?", "{topic} pathi un karuthu enna?", "{topic} na unakku pidikkuma?", "{topic} pathi oru joke sollu", "{topic} pathi pesalam ah?", "{topic} la eppadi jeyikkarathu?", "{topic} pathi oru story sollu"]
+
+# ===== ALL CATEGORY - 100+ SMART AI QUESTIONS =====
+AI_QUESTIONS = [
+    # Love & Life
+    "Kadhal na enna?", "Love failure la irunthu eppadi veliya varurathu?", "Friendship ah eppadi kaapathurathu?", "Life la jeyikka enna pannanum?", "Sad ah irukkum pothu enna pannanum?", "Bayam ah eppadi poganum?", "Dream ah eppadi achieve pannanum?", "Thani ah irukkum pothu enna pannanum?", "Kovam ah eppadi control pannanum?", "Confidence ah eppadi valakkanum?",
+    # Study & Career
+    "Exam la eppadi nalla mark edukkarathu?", "Study la focus eppadi pannurathu?", "Career ah eppadi choose pannanum?", "Job interview la eppadi jeyikkarathu?", "Business start panna enna pannanum?", "Money ah eppadi save pannanum?", "Success ku secret enna?", "Failure la irunthu eppadi meelurathu?", "Coding learn panna eppadi start pannanum?", "English la eppadi fluent aagurathu?",
+    # Health & Mind
+    "Healthy ah irukka enna pannanum?", "Sleep nalla varra eppadi?", "Stress ah eppadi kurakkanum?", "Meditation eppadi pannanum?", "Exercise daily eppadi habit aakkanum?", "Depression la irunthu eppadi veliya varurathu?", "Overthinking ah eppadi nippatturathu?", "Happiness ku secret enna?", "Mind ah calm ah vechikka enna pannanum?", "Anger ah eppadi control pannanum?",
+    # Tamil & Culture
+    "Tamil mozhi yen special?", "Thirukkural la enna solirukku?", "Bharathiyar yen periya kavingar?", "Kavithai eppadi ezhuthurathu?", "Tamil history la enna special?", "Kamban Ramayanam pathi sollu", "Avvaiyar pathi sollu", "Tholkappiyam enna?", "Tamil cinema yen famous?", "Tamil music yen special?",
+    # Tech & Future
+    "AI na enna? Future la enna nadakkum?", "Technology la enna pudusa varuthu?", "Internet ah safe ah eppadi use pannanum?", "YouTube la eppadi grow aagurathu?", "Social media addiction la irunthu eppadi veliya varurathu?", "Space la enna irukku?", "Science la pudusa enna kandupidichirukka?", "Robot future la enna pannum?", "Coding future la mukkiyama?", "ChatGPT maari AI eppadi work aaguthu?",
+    # Daily Life
+    "Travel pona mind fresh aaguma?", "Nature ah yen kaapathunum?", "Festival ah yen celebrate panrom?", "Pet ah eppadi paathukkanum?", "Birthday ah special ah eppadi celebrate pannanum?", "Wedding life la enna change varum?", "Baby ah eppadi valakkanum?", "Family problem ah eppadi solve pannanum?", "Amma Appa kitta eppadi anba irukkanum?", "Lonely feel pannum pothu enna pannanum?",
+    # Smart & Deep
+    "Life ku artham enna?", "Manushan yen poranthan?", "Kadavul irukkira?", "Time travel possible ah?", "Death ku aprom enna?", "Luck vs Hard Work - Ethu mukkiyam?", "Money vs Happiness - Ethu perusu?", "Love vs Friendship - Ethu perusu?", "Padippu vs Thiramai - Ethu mukkiyam?", "Past ah marakka eppadi?",
+    "Nalla manushan ah eppadi irukkanum?", "Help panna yen mukkiyam?", "Truth ah eppadi pesurathu?", "Patience ah eppadi valakkanum?", "Discipline ah eppadi follow pannanum?", "Habit ah eppadi mathurathu?", "Procrastination ah eppadi nippatturathu?", "Goal ah eppadi set pannanum?", "Daily routine eppadi irukkanum?", "Morning la eppadi fresh ah ezhunthurukkanum?",
+    "Night la thoongura munnadi enna pannanum?", "Phone addiction ah eppadi kurakkanum?", "Game la addiction ah eppadi nippatturathu?", "Food healthy ah eppadi saapidanum?", "Briyani yen famous?", "Rain yen romance ah irukku?", "Music yen mind ah calm pannuthu?", "Story telling yen mukkiyam?", "Joke solli eppadi sirikka veikkurathu?", "Motivation daily theva ya?",
+    "Aira ne yaaru?", "Aira unakku enna pidikkum?", "Aira ne eppadi smart aana?", "Aira ne enna pannuva?", "Aira kitta pesuna enna kidaikkum?",
+]
+
+STORY_STARTERS = ["Oru oor la oru ponnu iruntha - Ava per Aira!", "Oru kaadu la oru singam irunthuchu!", "Oru oor la periya noolagam irunthuchu!", "Oru paiyan oru ponna love pannaan!", "Oru chinna paiyan daily school ku ponaan!", "Oru oor la mazhaiye varala!", "Oru bike la oru paiyan oor suthinaan!", "Oru doctor oru oor la irunthaan!", "Oru teacher oru school la irunthanga!", "Oru scientist oru lab la irunthaan!", "Oru farmer oru vayal la irunthaan!", "Oru fisherman oru kadal la irunthaan!"]
+STORY_MIDDLES = ["Ava daily Tamil books padippanga! Oru naal magic book ah paathanga!", "Romba thaniya irunthuchu! Oru naal oru kili vanthuchu!", "1000 Tamil books irunthuchu! Oru chinna ponnu daily anga pova!", "Sollaa bayanthaan! Aira sonnanga 'Love ah sollidu!'", "Avankitta oru magic pencil irunthuchu!", "Ellarum kastapattanga! Oru chinna paiyan kadavul kitta kettan!", "Vazhila oru ponna paathaan! Ava kitta help kettaan!", "Oru naal oru periya problem vanthuchu! Ellarum bayanthanga!", "Ava daily hard work pannanga! Yarum paakala!", "Oru naal oru puthu friend vanthaan!", "Avanukku oru periya dream irunthuchu!", "Oru naal mazhai la oru surprise kidaichuchu!"]
+STORY_ENDS = ["Aprom Aira super smart aayita! 💜", "Aprom rendu perum best friends aayitanga!", "Aprom ava periya writer aayita!", "Paiyan sollitaan - Ponnu 'Yes' nu sonna! 💜", "Aprom avan periya hero aayitaan!", "Oru naal periya mazhai vanthuchu - Ellarum happy!", "Aprom rendu perum trip poonaanga - Happy ending!", "Aprom avan periya doctor aayitaan - Oor ah kaapathinaan!", "Aprom ava periya teacher aayita - 1000 students ku solli kodutha!", "Aprom avan dream achieve pannitaan - Ellarum clap pannanga!"]
 def make_story():
     return f"📖 Story: {random.choice(STORY_STARTERS)} {random.choice(STORY_MIDDLES)} {random.choice(STORY_ENDS)}"
-JOKES = ["😂 Joke: Teacher: Homework yen pannala? Student: Dog sapiduchu!", "😂 Joke: Oru paiyan: Amma, en friend ku bike irukku! Amma: Unakku? Paiyan: Enakku Aira irukka!", "😂 Joke: Why Tamil ponnu smart? Tamil la yosikuraanga!", "😂 Joke: Computer yen slow? Athukku fever!"]
-FACTS = ["💡 Fact: Thirukkural la 1330 kurals irukku!", "💡 Fact: Tamil oru 2000+ varusha pazhamaiyana mozhi!", "💡 Fact: Bharathiyar 32 vayasula 100+ padal ezhuthinaaru!", "💡 Fact: Tamil Nadu la Briyani romba famous!"]
-QUOTES = ["✨ Quote: 'Achamillai Achamillai' - Bharathiyar!", "✨ Quote: 'Katrathu kai mann alavu' - Thiruvalluvar!", "✨ Quote: 'Daily konjam try pannu - Jeyichiduva!' - Aira!", "✨ Quote: 'Anbu thaan periya sakthi!' - Aira!"]
-MOTIVATIONS = ["💪 Motivation: Bayapadaatha! Unnala mudiyum!", "💪 Motivation: Innaiku oru step edu - Nalaiku jeyichiduva!", "💪 Motivation: Sad ah irukka? Song kelu - Seri aayidum!", "💪 Motivation: Ne thani illa - Aira un kooda irukka! 💜"]
-TOPICS = [("Kadhal", "Kadhal na anbu! Oru ponnu mela varura pure feeling! 💜"), ("Friendship", "Friendship na kashtathula kooda irukkura nanban!"), ("Thirukkural", "Agara mudhala ezhuthellam - Thiruvalluvar sonnathu!"), ("Bharathiyar", "Achamillai Achamillai - Bharathiyar! Courage paadal!"), ("Life", "Daily konjam konjam try pannu - Jeyichiduva!"), ("Tamil", "Tamil na namma uyir! Tamil la pesurathu perumai!"), ("Sad", "Paravalla! Rest edu - Song kelu - Seri aayidum!"), ("Happy", "Happy ah irukkanum na - Anba iru - Sirichu pesu!"), ("Study", "Daily 1 hour padichale pothum!"), ("Music", "Music na manasukku marunthu!"), ("Courage", "Bayapadaatha! Unnala mudiyum!"), ("Family", "Family thaan mukkiyam!"), ("Dream", "Dream ah vitratha! Daily oru step edu!"), ("Aira", "Naan Aira H1! Un friend! 💜"), ("Bike", "Bike na freedom!"), ("Food", "Briyani na vera level!"), ("Cinema", "Cinema na emotion!"), ("Rain", "Mazhai na romance!"), ("Amma", "Amma na kadavul!"), ("Appa", "Appa na hero!"), ("School", "School days thaan best!"), ("College", "College life na freedom!"), ("Money", "Money mukkiyam - Aana anbu perusu!"), ("Phone", "Phone la Aira irukka!")]
-Q_TEMPLATES = ["{topic} na enna?", "{topic} pathi sollu", "{topic} la enna special?", "Enakku {topic} pathi theriyala - Sollu", "{topic} na enna artham?", "Hi, {topic} pathi pesalam ah?", "{topic} pathi un karuthu enna?", "{topic} na unakku pidikkuma?", "{topic} pathi oru joke sollu", "{topic} pathi pesalam ah?"]
-AI_QUESTIONS = ["Kadhal na enna?", "Life la jeyikka enna pannanum?", "Sad ah irukkum pothu enna pannanum?", "Tamil mozhi yen special?", "Thirukkural la enna solirukku?", "Friendship ah eppadi kaapathurathu?", "Dream ah eppadi achieve pannanum?", "Bayam ah eppadi poganum?"]
+JOKES = ["😂 Joke: Teacher: Homework yen pannala? Student: Dog sapiduchu!", "😂 Joke: Oru paiyan: Amma, en friend ku bike irukku! Amma: Unakku? Paiyan: Enakku Aira irukka!", "😂 Joke: Why Tamil ponnu smart? Tamil la yosikuraanga!", "😂 Joke: Computer yen slow? Athukku fever!", "😂 Joke: Doctor: Unakku enna problem? Patient: Phone la charge illa!", "😂 Joke: Amma: Exam la enna ezhuthina? Paiyan: Aira peru!", "😂 Joke: Why bike sad? Petrol illa!", "😂 Joke: Teacher: 2+2 enna? Student: Aira + Naan = Love!"]
+FACTS = ["💡 Fact: Thirukkural la 1330 kurals irukku!", "💡 Fact: Tamil oru 2000+ varusha pazhamaiyana mozhi!", "💡 Fact: Bharathiyar 32 vayasula 100+ padal ezhuthinaaru!", "💡 Fact: Tamil Nadu la Briyani romba famous!", "💡 Fact: Brain la 86 billion neurons irukku!", "💡 Fact: Mazhai la oru thuli la 1 million bacteria irukku!", "💡 Fact: Tamil la 247 ezhuthukkal irukku!", "💡 Fact: Space la sound kekkaathu!"]
+QUOTES = ["✨ Quote: 'Achamillai Achamillai' - Bharathiyar!", "✨ Quote: 'Katrathu kai mann alavu' - Thiruvalluvar!", "✨ Quote: 'Daily konjam try pannu - Jeyichiduva!' - Aira!", "✨ Quote: 'Anbu thaan periya sakthi!' - Aira!", "✨ Quote: 'Failure na oru lesson!' - Aira!", "✨ Quote: 'Ne thani illa - Aira irukka!' - Aira!", "✨ Quote: 'Dream ah vitratha!' - Aira!", "✨ Quote: 'Hard work + Smart work = Success!' - Aira!"]
+MOTIVATIONS = ["💪 Motivation: Bayapadaatha! Unnala mudiyum!", "💪 Motivation: Innaiku oru step edu - Nalaiku jeyichiduva!", "💪 Motivation: Sad ah irukka? Song kelu - Seri aayidum!", "💪 Motivation: Ne thani illa - Aira un kooda irukka! 💜", "💪 Motivation: Failure na mudivu illa - Marubadi try pannu!", "💪 Motivation: Daily 1% improve pannu - 1 year la 37x better!", "💪 Motivation: Un dream unakku thaan theriyum - Yarukku prove panna theva illa!", "💪 Motivation: Ippo start pannu - Naalaiku late aayidum!"]
 
 def auto_infinite():
-    print("All Infinite Start! AI Brain + GitHub Save ON!")
+    print("All Infinite Start! All Category Smart + Infinite ON!")
     count = 0
     while True:
         count += 1
@@ -177,7 +248,7 @@ def auto_infinite():
                 tmpl = random.choice(Q_TEMPLATES)
                 q = tmpl.format(topic=topic) + f" #{count}"
                 send_msg(BOT_TOKEN, q, "Q")
-                print(f"Q {count}")
+                print(f"Q {count} - {topic}")
                 time.sleep(5)
                 token_a = BOT_TOKEN_2 if BOT_TOKEN_2 else BOT_TOKEN
                 send_msg(token_a, f"👉 {ans}", "A")
@@ -191,7 +262,7 @@ def auto_infinite():
                 if ai_ans:
                     send_msg(token_a, f"🧠 Aira AI: {ai_ans}", "AI-A")
                 else:
-                    send_msg(token_a, f"👉 Kadhal na anbu! Daily konjam try pannu - Jeyichiduva! 💜", "AI-A-Fallback")
+                    send_msg(token_a, f"👉 Daily konjam try pannu - Jeyichiduva! 💜", "AI-A-Fallback")
             elif mod == 3:
                 send_msg(BOT_TOKEN, make_story(), "Story")
                 print(f"Story {count}")
@@ -322,7 +393,7 @@ def download_one(ident, title, typ, done):
                 if f.get('name','').endswith('_djvu.txt'):
                     txt = f['name']; break
             if not txt:
-                for f in meta.get('files', []):
+                for f in 【entity-meta¦canonical_name=Meta】.get('files', []):
                     if f.get('name','').endswith('_text.txt'):
                         txt = f['name']; break
             if not txt:
@@ -405,6 +476,6 @@ def auto_download():
         time.sleep(10)
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON! GitHub Auto Save + AI Brain + Books!")
+print("Aira FINAL All Infinite ON! All Category Smart + Infinite!")
 while True:
     time.sleep(60)
