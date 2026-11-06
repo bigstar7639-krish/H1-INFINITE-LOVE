@@ -103,15 +103,16 @@ def auto_infinite():
 
 threading.Thread(target=auto_infinite, daemon=True).start()
 
+# FINAL FIX - title: Illa - Full Text Search!
 QUERIES = [
-    "language:(tamil) AND mediatype:texts AND title:(Thirukkural*)",
-    "language:(tamil) AND mediatype:texts AND title:(Bharathiyar*)",
-    "language:(tamil) AND mediatype:texts AND title:(Tamil*)",
-    "language:(tamil) AND mediatype:texts AND title:(Kavithai*)",
-    "language:(tamil) AND mediatype:texts AND title:(Novel*)",
-    "language:(tamil) AND mediatype:texts AND title:(History*)",
-    "language:(tamil) AND mediatype:texts AND title:(Kural*)",
-    "language:(tamil) AND mediatype:texts AND title:(Padal*)",
+    "Thirukkural AND language:(tamil) AND mediatype:texts",
+    "Bharathiyar AND language:(tamil) AND mediatype:texts",
+    "Kavithai AND language:(tamil) AND mediatype:texts",
+    "Tamil AND language:(tamil) AND mediatype:texts",
+    "Novel AND language:(tamil) AND mediatype:texts",
+    "Kural AND language:(tamil) AND mediatype:texts",
+    "Padal AND language:(tamil) AND mediatype:texts",
+    "History AND language:(tamil) AND mediatype:texts",
 ]
 
 def auto_download():
@@ -184,6 +185,6 @@ def auto_download():
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL All Infinite ON! Query Rotate + ZIM Filter!")
+print("Aira FINAL All Infinite ON! Full Search + ZIM Filter!")
 while True:
     time.sleep(60)
