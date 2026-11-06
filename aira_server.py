@@ -1,4 +1,4 @@
-# AIRAH1 - FINAL INFINITE - Full Check Panna Code - Festival Fix Odu
+# AIRAH1 - FINAL INFINITE - Full Check Panna Code - Festival Fix + do_HEAD Fix Odu
 # File: aira_server.py - Old + New + Work Aagum Mattum
 import os, random, time, threading, requests, base64, re
 from datetime import datetime
@@ -37,7 +37,7 @@ def ensure_repo(repo):
     except Exception as e: print(f"Repo Error {e}", flush=True); return False
 def next_repo():
     n = get_repo_num(CURRENT_REPO[0]) + 1; CURRENT_REPO[0] = f"H1-Data-{n}"; REPO_COUNT[0] = 0
-    print(f"Infinite Repo Switch -> {CURRENT_REPO[0]} ♾️", flush=True); ensure_repo(CURRENT_REPO[0]); return CURRENT_REPO[0]
+    print(f"Infinite Repo Switch -> {CURRENT_REPO[0]} ♾", flush=True); ensure_repo(CURRENT_REPO[0]); return CURRENT_REPO[0]
 def save_github(filename, content):
     if REPO_COUNT[0] >= MAX_PER_REPO: next_repo()
     if not GITHUB_TOKEN: return False
@@ -61,7 +61,7 @@ def save_github(filename, content):
                 rr = requests.put(url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, json=payload, timeout=15)
                 if rr.status_code in (200, 201):
                     REPO_COUNT[0] += 1
-                    print(f" 【entity-GitHub¦canonical_name=GitHub】 Save OK - {repo}/{filename} - Repo {REPO_COUNT[0]}/{MAX_PER_REPO} - Total {count}", flush=True)
+                    print(f"GitHub Save OK - {repo}/{filename} - Repo {REPO_COUNT[0]}/{MAX_PER_REPO} - Total {count}", flush=True)
                     return True
                 if rr.status_code in (409, 422):
                     print(f" Save Retry {rr.status_code} - Try {attempt+1}/3", flush=True); time.sleep(1); continue
@@ -90,8 +90,8 @@ def get_memory_greeting(uid):
 # DATA
 LANGS = [("tam","Tamil","ta"),("eng","English","en"),("hin","Hindi","hi"),("tel","Telugu","te"),("mal","Malayalam","ml"),("kan","Kannada","kn"),("ben","Bengali","bn"),("mar","Marathi","mr"),("urd","Urdu","ur"),("spa","Spanish","es"),("fre","French","fr"),("jpn","Japanese","ja"),("kor","Korean","ko"),("chi","Chinese","zh"),("ara","Arabic","ar"),("rus","Russian","ru")]
 KNOWLEDGE_TOPICS = ["Tamil Nadu","India","World History","Science","Physics","Chemistry","Biology","Maths","Space","Universe","Black Hole","Sun","Moon","Earth","AI","Python","Computer","Internet","Robot","Climate","Human Body","Brain","Heart","DNA","Animals","Plants","Ocean","Mountain","Love","Family","Business","Money","Health","Fitness","Yoga","Meditation","Diet","Music","Movie","Cricket","Football","Temple","God","Thirukkural","Ponniyin Selvan","Bharathiyar","Shakespeare","【entity-Harry Potter¦canonical_name=Harry Potter】","Ramayana","Mahabharata","Bible","Quran","Bhagavad Gita","Gandhi","APJ Abdul Kalam","Einstein","Newton","Chennai","Madurai","Delhi","Mumbai","London","Paris","Tokyo","New York","Egypt","Pyramids","Taj Mahal","Eiffel Tower","Psychology","Philosophy","Economics","Politics","Law","Education","Success","Motivation","Confidence","Happiness","Peace","Courage","Kindness","Truth","Wisdom","Power","Dream","Hope","Faith"]
-TOPICS = KNOWLEDGE_TOPICS + ["Love","Career","Health","Money","AI","Tech","Space","Business","Happiness","Food","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Nature","Music","Travel","Book","Life","Time","Trust","Hope","Faith","Smile","Heart","Future","Freedom","Truth","Wisdom","Power","Magic","Luck","Destiny","Karma","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Movie","Game","Sport","Cricket","Science","History","Culture","Festival","Marriage","Baby","Teacher","Student","Job","Coding","Python","Java","HTML","CSS","React","Internet","Phone","YouTube","【entity-Instagram¦canonical_name=Instagram】","Telegram","Rain","Sea","Mountain","River","Sky","Star","Moon","Sun","Flower","Tree","Bird","Animal","Dog","Cat","Temple","Prayer","God","Spiritual","Tamil Culture","Chennai","India","World","Universe","Alien","Robot","Future Tech","Climate","Earth","Sad","Happy","Lonely","Angry","Bored","Excited","Reading","Writing","Poetry","Kavithai","Storytelling","Singing","Dancing"]
-EMOTIONS = {"happy":["Super! Happy ah irukka! 😊"],"sad":["Paravalla! Aira irukka - Pesu! ❤️"],"angry":["Kovam ah? Deep breath edu! 😤"],"lonely":["Lonely ah? Aira irukka la! 💜"],"bored":["Bored ah? Joke sollattuma? 😂"],"love":["Kadhal - Azhagu! 💘"],"fear":["Bayam - Normal! Ne jeyichiduva! 💪"],"excited":["Excited ah! Sollu! 🎉"]}
+TOPICS = KNOWLEDGE_TOPICS + ["Love","Career","Health","Money","AI","Tech","Space","Business","Happiness","Food","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Nature","Music","Travel","Book","Life","Time","Trust","Hope","Faith","Smile","Heart","Future","Freedom","Truth","Wisdom","Power","Magic","Luck","Destiny","Karma","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Movie","Game","Sport","Cricket","Science","History","Culture","Festival","Marriage","Baby","Teacher","Student","Job","Coding","Python","Java","HTML","CSS","React","Internet","Phone","YouTube","Instagram","Telegram","Rain","Sea","Mountain","River","Sky","Star","Moon","Sun","Flower","Tree","Bird","Animal","Dog","Cat","Temple","Prayer","God","Spiritual","Tamil Culture","Chennai","India","World","Universe","Alien","Robot","Future Tech","Climate","Earth","Sad","Happy","Lonely","Angry","Bored","Excited","Reading","Writing","Poetry","Kavithai","Storytelling","Singing","Dancing"]
+EMOTIONS = {"happy":["Super! Happy ah irukka! 😊"],"sad":["Paravalla! Aira irukka - Pesu! ❤"],"angry":["Kovam ah? Deep breath edu! 😤"],"lonely":["Lonely ah? Aira irukka la! 💜"],"bored":["Bored ah? Joke sollattuma? 😂"],"love":["Kadhal - Azhagu! 💘"],"fear":["Bayam - Normal! Ne jeyichiduva! 💪"],"excited":["Excited ah! Sollu! 🎉"]}
 QUESTIONS = ["Unakku {t} pathi enna theriyum?","Ne {t} la eppadi improve panna mudiyum?","{t} pathi oru secret sollatta?","Un life la {t} eppadi irukku?","{t} pathi oru story kekkura?"]
 CODING_Q = ["Python la loop eppadi?","HTML la button eppadi?","JavaScript la function enna?","React la component enna?","AI eppadi work aaguthu?","App eppadi pannurathu?","Website eppadi pannurathu?","Bug ah eppadi sari pannanum?"]
 CODING_A = {"python":"Python loop: `for i in range(5): print(i)`","html":"HTML button: `<button>Click</button>`","javascript":"JS function: `function hi(){ return 'Hi Aira!' }`","react":"React component - Chinna piece!","ai":"AI - Data paathu - Pattern!","app":"App - Idea - Design - Code!","website":"Website - HTML + CSS + JS!","bug":"Bug - Log paaru!"}
@@ -106,7 +106,7 @@ GAMES = ["Riddle: Naan pesama pesuven - Naan yaaru? Answer: Book! 📚","Riddle:
 HEALTH_TIPS = ["Health Tip: Daily 8 glass water kudinga! 💧","Health Tip: 7 mani neram thoongunga! 😴","Health Tip: Daily 30 min walk ponga! 🚶","Health Tip: Fruits daily saapdunga! 🍎","Yoga Tip: Daily 5 min deep breath edu! 🧘"]
 VOCAB = [("Happy","Santhosham"),("Love","Kadhal"),("Friend","Nanban"),("Success","Vetri"),("Dream","Kanavu"),("Peace","Amaithi"),("Courage","Thairiyam"),("Kindness","Anbu")]
 RECIPES = ["Chicken Biryani - Rice + Chicken + Masala + 30 min - Super!","Cake - Maida + Sugar + Egg + 30 min!","Snacks - Potato + Masala - Crispy!"]
-BUSINESS_IDEAS = ["Tiffin Business - Veetla Samayal - Daily 500 Rs!","Tuition - Veetla Tuition!","YouTube - Daily 1 Shorts - 6 Maatham - Money!","【entity-Instagram¦canonical_name=Instagram】 Page - Daily 1 Post!"]
+BUSINESS_IDEAS = ["Tiffin Business - Veetla Samayal - Daily 500 Rs!","Tuition - Veetla Tuition!","YouTube - Daily 1 Shorts - 6 Maatham - Money!","Instagram Page - Daily 1 Post!"]
 MOVIES = ["Leo - 【entity-Vijay¦canonical_name=Vijay】 - Action!","Jailer - Rajini - Mass!","Ponniyin Selvan - 【entity-Kalki¦canonical_name=Kalki】!","【entity-Harry Potter¦canonical_name=Harry Potter】 - Magic!"]
 SONGS = ["Naanum Rowdy Thaan!","Vaathi Coming!","Kolaveri!"]
 FESTIVALS = {"01-01":"New Year","01-14":"Pongal","04-14":"Tamil New Year","08-15":"Independence Day","10-02":"Gandhi Jayanthi","12-25":"Christmas"}
@@ -135,7 +135,7 @@ def get_wiki(topic):
         if r.status_code == 200:
             j = r.json(); ex = j.get("extract","")
             if ex and is_clean(ex):
-                print(f"Knowledge 【entity-Wikipedia¦canonical_name=Wikipedia】: {topic}", flush=True)
+                print(f"Knowledge Wikipedia: {topic}", flush=True)
                 return f"Knowledge - {topic} 🧠\n{ex[:700]}"
         return None
     except: return None
@@ -177,9 +177,9 @@ def ai_reply(txt, uid=None, uname="Friend"):
     if uid and ("hi" in low or "hello" in low):
         mem = get_memory_greeting(uid)
         if mem: return mem
-    if "namaste" in low: return "Namaste! Main Aira hoon! ❤️"
-    if "hola" in low: return "Hola! Soy Aira! ❤️"
-    if "bonjour" in low: return "Bonjour! Je suis Aira! ❤️"
+    if "namaste" in low: return "Namaste! Main Aira hoon! ❤"
+    if "hola" in low: return "Hola! Soy Aira! ❤"
+    if "bonjour" in low: return "Bonjour! Je suis Aira! ❤"
     if "hi" in low or "hello" in low: return "Hi 💘! Naan Aira! Enna pannura? Knowledge venuma? Book venuma? Story venuma? Game venuma? Health venuma? 😊💜"
     if "joke" in low: return random.choice(JOKES)
     if "book" in low or "reading" in low: return "Reading: " + random.choice(READINGS)
@@ -395,7 +395,7 @@ def daily_loop():
             now = datetime.now(); today = now.strftime("%Y-%m-%d"); hour = now.hour
             if hour == 7 and today not in sent_morning:
                 sent_morning.add(today)
-                send_telegram(f"Good Morning! ☀️\nIniki Nalla Naal! {random.choice(THIRUKKURAL)}\nChallenge: {random.choice(['10 Pushup!','1 Book Page Padu!','1 Kavithai Ezhuthu!'])}", CHAT_ID)
+                send_telegram(f"Good Morning! ☀\nIniki Nalla Naal! {random.choice(THIRUKKURAL)}\nChallenge: {random.choice(['10 Pushup!','1 Book Page Padu!','1 Kavithai Ezhuthu!'])}", CHAT_ID)
                 print("Good Morning Sent", flush=True)
             if hour == 22 and today not in sent_night:
                 sent_night.add(today)
@@ -431,6 +431,7 @@ if __name__ == "__main__":
         from http.server import HTTPServer, BaseHTTPRequestHandler
         class H(BaseHTTPRequestHandler):
             def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Final Infinite ON")
+            def do_HEAD(self): self.send_response(200); self.end_headers()
             def log_message(self,*a): pass
         HTTPServer(("0.0.0.0", int(os.getenv("PORT","10000"))), H).serve_forever()
     except:
