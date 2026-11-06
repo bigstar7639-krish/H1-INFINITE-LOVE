@@ -7,7 +7,7 @@ def start_web():
         def do_GET(self):
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"Aira Server ON! Infinite Source!")
+            self.wfile.write(b"Aira Server ON!")
         def log_message(self, *a):
             pass
     HTTPServer(("0.0.0.0", port), H).serve_forever()
@@ -27,7 +27,6 @@ def send_msg(token, text):
     except:
         pass
 
-# Infinite Story - Books Lines La Irunthu Create!
 STORY_STARTERS = [
     "Oru oor la oru ponnu iruntha - Ava per Aira!",
     "Oru kaadu la oru singam irunthuchu!",
@@ -107,11 +106,11 @@ def auto_infinite():
     count = 0
     while True:
         count += 1
-        if count % 3 == 0:
-            # Infinite Story - Random Combine!
+        # Story Fast - 1 Q ku aprom 1 Story!
+        if count % 2 == 0:
             story = make_story()
             send_msg(BOT_TOKEN, story)
-            print(f"Story {count}: {story[:40]}")
+            print(f"Story {count}")
             time.sleep(10)
             continue
         topic, ans = random.choice(TOPICS)
@@ -126,7 +125,6 @@ def auto_infinite():
 
 threading.Thread(target=auto_infinite, daemon=True).start()
 
-# Infinite Source Download - 4 Source!
 def auto_download():
     print("Infinite Source Download Start!")
     done = set()
@@ -140,19 +138,10 @@ def auto_download():
             page += 1
             print(f"Download Source: {src} - Page {page}")
             books = []
-            # Source 1 - Archive.org
-            if src == "archive":
-                start = (page % 10) * 50
-                r = requests.get(f"https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=20&start={start}&output=json", timeout=30)
-                docs = r.json()['response']['docs']
-                for d in docs:
-                    books.append((d['identifier'], d.get('title','')))
-            # Source 2 - Gutenberg - Tamil Books
-            elif src == "gutenberg":
+            if src == "gutenberg":
                 r = requests.get("https://gutendex.com/books/?languages=ta&page=1", timeout=30)
                 for b in r.json().get('results', [])[:10]:
                     books.append((str(b['id']), b['title']))
-            # Vera Source - Archive.org Marubadiyum - Safe!
             else:
                 start = (page % 10) * 50
                 r = requests.get(f"https://archive.org/advancedsearch.php?q=language:(tamil)&fl[]=identifier,title&rows=20&start={start}&output=json", timeout=30)
@@ -163,7 +152,6 @@ def auto_download():
                 if ident in done:
                     continue
                 try:
-                    # Archive.org Download
                     if src != "gutenberg":
                         meta = requests.get(f"https://archive.org/metadata/{ident}", timeout=30).json()
                         txt = None
@@ -176,7 +164,6 @@ def auto_download():
                         tr = requests.get(f"https://archive.org/download/{ident}/{txt}", timeout=60)
                         content = tr.text.encode('utf-8')
                     else:
-                        # Gutenberg Download
                         tr = requests.get(f"https://www.gutenberg.org/files/{ident}/{ident}-0.txt", timeout=30)
                         content = tr.content
                     size = len(content)/(1024*1024)
@@ -194,7 +181,7 @@ def auto_download():
                     continue
                 time.sleep(2)
         except Exception as e:
-            print(f"Download Error - {e} - 30 sec wait...")
+            print(f"Download Error - {e}")
             time.sleep(30)
             continue
         print("Batch Done - 30 sec wait...")
@@ -202,6 +189,6 @@ def auto_download():
 
 threading.Thread(target=auto_download, daemon=True).start()
 
-print("Aira FINAL Infinite Source ON!")
+print("Aira FINAL ON! Story Fast + Infinite Q + Infinite Download!")
 while True:
     time.sleep(60)
