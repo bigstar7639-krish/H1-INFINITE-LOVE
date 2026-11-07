@@ -311,7 +311,17 @@ def fetch_wikimedia(query):
     except Exception as e: print(f"Wikimedia Error {e}", flush=True); return []
 
 def bot1_image_worker():
+    # RESUME: GitHub la Last Category Paaru - Tamil la Irundhu Thirumba Start Aaga Venaam!
+    _resume_cat, _resume_n = load_progress()
     idx = 0
+    if _resume_cat and _resume_cat in BASE_CATS:
+        idx = BASE_CATS.index(_resume_cat)
+        print(f"RESUME: Start Category {_resume_cat} - Idx {idx} - Last N {_resume_n}", flush=True)
+        # If last category was 100/100 mudinjiduchu - Next category ku Po!
+        if _resume_n >= 100:
+            idx += 1
+            print(f"RESUME: {_resume_cat} 100/100 Mudinjiduchu - Next {BASE_CATS[idx % len(BASE_CATS)]}", flush=True)
+
     while True:
         try:
             cat = BASE_CATS[idx % len(BASE_CATS)]; idx += 1
@@ -365,6 +375,7 @@ def bot1_image_worker():
                     send_to_channel(f"Auto Image - {cat} - {n}/100 | Master Prompt: {master_now} 📸\nSource: {src} - No Watermark - Made by Aira H1 ❤️\n{url}", BOT1_TOKEN, "Bot1-Image")
                     save_github(f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {src} - {url}")
                     print(f"Bot1 - {cat} - {n}/100 Done!", flush=True)
+                    save_progress(cat, n)
                     time.sleep(2)  # Slow - 2 sec ku 1 image - Spam illa
                 except Exception as e: print(f"Bot1 100 Error {e}", flush=True); time.sleep(2)
             print(f"Bot1 Done - {cat} - 100/100 - Next Category!", flush=True)
@@ -426,6 +437,27 @@ def self_heal():
         except Exception as e: print(f"Self-Heal Error {e}", flush=True); time.sleep(30)
 
 
+
+
+# --- RESUME FIX V6 - Category Reset Aaga Koodaathu! ---
+# Problem: Deploying vantha - Puthu Bot Tamil 1/100 la Irundhu Start Aaguthu - Love/God/Nature Progress Poiduthu!
+# Fix: Oru Category Mudiyum Pothu + Oru Image Mudiyum Pothu - GitHub la Progress Save Pannuvom - Puthu Bot Athula Irundhu Thodarum!
+def save_progress(cat, n):
+    try: save_github("progress-worker.txt", f"{cat}|{n}|{datetime.now().isoformat()}")
+    except: pass
+def load_progress():
+    try:
+        import base64 as _b64
+        url = f"https://api.github.com/repos/{GITHUB_USER}/{CURRENT_REPO[0]}/contents/data/progress-worker.txt"
+        r = requests.get(url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, timeout=10)
+        if r.status_code == 200:
+            content = _b64.b64decode(r.json().get("content","")).decode(errors="ignore").strip().split("\n")[-1]
+            parts = content.split("|")
+            if len(parts) >= 2:
+                print(f"RESUME: Last Progress - {parts[0]} - {parts[1]}/100 - Athula Irundhu Thodarum!", flush=True)
+                return parts[0], int(parts[1])
+    except Exception as e: print(f"Resume Load Error {e}", flush=True)
+    return None, 0
 
 # --- CHATGPT IMAGEGEN MASTER - INFINITE - A TO Z - V5 ---
 # Professional Prompt Structure: Subject + Appearance + Clothing + Pose + Expression + Environment + Camera + Lighting + Style + Colour + Composition + Detail + Aspect + Preserve + Avoid
