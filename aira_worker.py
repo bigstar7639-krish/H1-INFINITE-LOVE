@@ -425,7 +425,55 @@ def self_heal():
             save_github(f"heartbeat-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"Worker Alive - {datetime.now()} - Repo {CURRENT_REPO[0]}")
         except Exception as e: print(f"Self-Heal Error {e}", flush=True); time.sleep(30)
 
+
+# --- SINGLE INSTANCE GUARD - Double Bot Stop! ---
+# Render la Deploying Thirumba Varum pothu - Pazhaya Bot innum Saagala - Puthu Bot Start Aagidum - Athanala Double!
+# Ithu: Start aagum pothu GitHub Heartbeat paakum - 2 Min kulla Heartbeat iruntha - Vera Bot Oduthu nu - Ithu Wait Pannum / Exit Aagum!
+import json as _json
+def check_other_instance():
+    try:
+        from datetime import datetime as _dt, timezone as _tz
+        url = f"https://api.github.com/repos/{GITHUB_USER}/{CURRENT_REPO[0]}/contents/data/heartbeat-worker-{_dt.now().strftime('%Y-%m-%d')}.txt"
+        r = requests.get(url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, timeout=10)
+        if r.status_code == 200:
+            import base64 as _b64
+            content = _b64.b64decode(r.json().get("content","")).decode(errors="ignore")
+            # Last line la timestamp irukku - "Worker Alive - 2026-11-07 11:54:xx"
+            last_line = content.strip().split("\n")[-1]
+            # Try parse datetime from line
+            for fmt in ["%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S"]:
+                try:
+                    # Find datetime substring
+                    import re as _re
+                    m = _re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", last_line)
+                    if m:
+                        last_dt = _dt.strptime(m.group(1), "%Y-%m-%d %H:%M:%S")
+                        diff = (_dt.now() - last_dt).total_seconds()
+                        print(f"Single-Instance Check - Last Heartbeat {diff:.0f} sec ago - {last_line[:80]}", flush=True)
+                        if diff < 120:
+                            print("Single-Instance GUARD: Vera Bot Oduthu! Ithu 90 sec Wait Panni Thirumba Check Pannum...", flush=True)
+                            return False
+                        break
+                except: pass
+    except Exception as e:
+        print(f"Single-Instance Check Error {e} - Continue", flush=True)
+    return True
+
+def wait_for_single_instance():
+    # Max 3 try - 90 sec each - Vera bot saagala na - Ithu Exit Aagidum - Double aagaathu!
+    for attempt in range(3):
+        if check_other_instance():
+            print("Single-Instance GUARD: OK - Naan Mattum Thaan Oduren!", flush=True)
+            return True
+        print(f"Single-Instance GUARD: Wait {attempt+1}/3 - 90 sec...", flush=True)
+        time.sleep(90)
+    print("Single-Instance GUARD: Vera Bot Innum Oduthu - Naan Exit Aaguren - Double Stop!", flush=True)
+    # Exit - Render will restart later - Pazhaya bot saagum pothu puthu bot varum
+    import sys; sys.exit(0)
+
+
 if __name__ == "__main__":
+    wait_for_single_instance()
     print("AIRAH1 WORKER FINAL INFINITE - Started - Data Channel!", flush=True)
     threading.Thread(target=bot1_image_worker, daemon=True).start()
     threading.Thread(target=bot2_knowledge_worker, daemon=True).start()
