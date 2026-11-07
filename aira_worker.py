@@ -68,6 +68,7 @@ def save_github(filename, content):
         return False
 
 # --- 100+ CATEGORIES - Tamil + Japan + China + India + Global ---
+START_N = 1
 BASE_CATS = ["Tamil","Love","God","Nature","Cat","Dog","Food","Cricket","Space","Story","Health","Music","Movie","Temple","Flower","Sea","Mountain","River","Sky","Star","Moon","Sun","Bird","Animal","Baby","Teacher","Student","Business","Money","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Game","Sport","Football","Science","History","Culture","Festival","Marriage","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Kindness","Truth","Wisdom","Power","Magic","Luck","Destiny","Karma","Rain","Village","City","Chennai","Madurai","Delhi","Mumbai","London","Paris","Tokyo","New York","Egypt","Pyramids","Taj Mahal","Eiffel Tower","Psychology","Philosophy","Economics","Politics","Law","Education","Happiness","Smile","Heart","Future","Freedom","Hope","Faith",
 # Japan
 "Japan","Tokyo","Sakura","Kimono","Anime","Japanese Food","Sushi","Kyoto","Osaka","Japanese Temple","Japanese Girl","Samurai","Ninja",
@@ -314,9 +315,14 @@ def bot1_image_worker():
     # RESUME: GitHub la Last Category Paaru - Tamil la Irundhu Thirumba Start Aaga Venaam!
     _resume_cat, _resume_n = load_progress()
     idx = 0
+    global START_N
+    START_N = 1
     if _resume_cat and _resume_cat in BASE_CATS:
         idx = BASE_CATS.index(_resume_cat)
         print(f"RESUME: Start Category {_resume_cat} - Idx {idx} - Last N {_resume_n}", flush=True)
+        if _resume_n and _resume_n < 100:
+            START_N = _resume_n + 1
+            print(f"RESUME: Count Resume - {START_N}/100 la Irundhu Thodarum! - 1 la Irundhu Illa!", flush=True)
         # If last category was 100/100 mudinjiduchu - Next category ku Po!
         if _resume_n >= 100:
             idx += 1
@@ -357,7 +363,7 @@ def bot1_image_worker():
                     if u not in seen2: seen2.add(u); uniq2.append(u)
                 prompt_cache[prompt_text] = uniq2
                 return uniq2
-            for n in range(1, 101):
+            for n in range(START_N, 101):
                 try:
                     prompt_now, master_now = get_master_prompt(cat, n)
                     pool_now = get_pool_for_prompt(prompt_now)
