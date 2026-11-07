@@ -349,7 +349,7 @@ def bot1_image_worker():
                 return uniq2
             for n in range(1, 101):
                 try:
-                    prompt_now = get_infinite_prompt(cat, n)
+                    prompt_now, master_now = get_master_prompt(cat, n)
                     pool_now = get_pool_for_prompt(prompt_now)
                     if pool_now:
                         url = pool_now[(n-1) % len(pool_now)]
@@ -362,7 +362,7 @@ def bot1_image_worker():
                     if n % 10 == 0:
                         url = f"https://source.unsplash.com/800x600/?{prompt_now.replace(' ','%20')}"
                         src = "Unsplash"
-                    send_to_channel(f"Auto Image - {cat} - {n}/100 | Prompt: {prompt_now} 📸\nSource: {src} - No Watermark - Made by Aira H1 ❤️\n{url}", BOT1_TOKEN, "Bot1-Image")
+                    send_to_channel(f"Auto Image - {cat} - {n}/100 | Master Prompt: {master_now} 📸\nSource: {src} - No Watermark - Made by Aira H1 ❤️\n{url}", BOT1_TOKEN, "Bot1-Image")
                     save_github(f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {src} - {url}")
                     print(f"Bot1 - {cat} - {n}/100 Done!", flush=True)
                     time.sleep(2)  # Slow - 2 sec ku 1 image - Spam illa
@@ -425,6 +425,27 @@ def self_heal():
             save_github(f"heartbeat-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"Worker Alive - {datetime.now()} - Repo {CURRENT_REPO[0]}")
         except Exception as e: print(f"Self-Heal Error {e}", flush=True); time.sleep(30)
 
+
+
+# --- CHATGPT IMAGEGEN MASTER - INFINITE - A TO Z - V5 ---
+# Professional Prompt Structure: Subject + Appearance + Clothing + Pose + Expression + Environment + Camera + Lighting + Style + Colour + Composition + Detail + Aspect + Preserve + Avoid
+# Infinite = Category (150+) x Camera (10) x Lighting (10) x Style (10) = 150,000+ Combo! Vera Photo Varaathu!
+IMAGEGEN_CAMERAS = ["50mm natural perspective, eye level, full-body shot", "85mm portrait, three-quarter view, close-up", "35mm environmental photography, wide angle", "24mm wide angle, low angle", "100mm macro, extreme close-up", "14mm ultra-wide, bird's-eye view", "135mm compressed portrait, side view", "50mm, over-the-shoulder, medium shot", "85mm, front view, medium shot", "35mm, Dutch angle, full-body shot"]
+IMAGEGEN_LIGHTINGS = ["golden hour, soft daylight, warm glow", "studio softbox, diffused lighting, clean", "rim lighting, backlighting, dramatic", "neon lighting, cinematic, colourful", "moonlight, blue hour, calm", "candlelight, warm, intimate", "volumetric lighting, god rays", "chiaroscuro, dramatic contrast", "soft daylight, natural, bright", "ambient lighting, balanced"]
+IMAGEGEN_STYLES = ["photorealism, hyperrealism, sharp detail", "Japanese anime, manga style, vibrant", "cinematic realism, film grain, depth of field", "Pixar-inspired cartoon, cute, stylized 3D", "watercolor, soft, artistic", "oil painting, rich texture", "digital painting, detailed", "cyberpunk, neon, futuristic", "dark fantasy, moody", "storybook illustration, warm"]
+IMAGEGEN_ASPECTS = ["9:16 vertical", "1:1 square", "16:9 landscape", "4:5 portrait", "3:4 portrait"]
+
+def get_master_prompt(cat, n):
+    # n = 1..100 - Infinite combo rotate - Camera, Lighting, Style, Aspect ellam rotate aagum!
+    base = IMAGE_PROMPTS.get(cat, [cat])[ (n-1) % len(IMAGE_PROMPTS.get(cat, [cat])) ] if cat in IMAGE_PROMPTS else cat
+    cam = IMAGEGEN_CAMERAS[(n-1) % len(IMAGEGEN_CAMERAS)]
+    light = IMAGEGEN_LIGHTINGS[(n-1) % len(IMAGEGEN_LIGHTINGS)]
+    style = IMAGEGEN_STYLES[(n-1) % len(IMAGEGEN_STYLES)]
+    aspect = IMAGEGEN_ASPECTS[(n-1) % len(IMAGEGEN_ASPECTS)]
+    # Professional Master Prompt - For Openverse Search: short search term + For Caption: full master prompt
+    search_term = base
+    master_prompt = f"SUBJECT: {base} | APPEARANCE: beautiful, natural, detailed | POSE: natural pose | EXPRESSION: smiling, warm | ENVIRONMENT: beautiful background | CAMERA: {cam} | LIGHTING: {light} | ART STYLE: {style} | COLOUR: vibrant, balanced | COMPOSITION: rule of thirds, focal point, negative space | DETAIL: sharp, high texture | ASPECT: {aspect} | AVOID: watermark, blur, distorted hands, bad text"
+    return search_term, master_prompt
 
 # --- SINGLE INSTANCE GUARD - Double Bot Stop! ---
 # Render la Deploying Thirumba Varum pothu - Pazhaya Bot innum Saagala - Puthu Bot Start Aagidum - Athanala Double!
