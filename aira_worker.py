@@ -385,6 +385,7 @@ def bot1_image_worker():
                     time.sleep(2)  # Slow - 2 sec ku 1 image - Spam illa
                 except Exception as e: print(f"Bot1 100 Error {e}", flush=True); time.sleep(2)
             print(f"Bot1 Done - {cat} - 100/100 - Next Category!", flush=True)
+            START_N = 1  # FIX: Next Category 1 la Irundhu Start Aaganum - 12 la Illa!
             time.sleep(10)
         except Exception as e: print(f"Bot1 Error {e}", flush=True); time.sleep(30)
 
