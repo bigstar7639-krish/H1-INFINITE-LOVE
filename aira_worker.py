@@ -87,6 +87,185 @@ SEARCH_MAP = {
     "Science": "science laboratory microscope", "Space": "space stars galaxy rocket", "Nature": "beautiful nature forest mountain", "Health": "yoga healthy fitness meditation", "Food": "delicious food", "Cricket": "cricket stadium match", "Temple": "hindu temple", "God": "hindu god temple divine",
 }
 
+
+# --- NEW IMAGE PROMPT - INFINITE PROMPT - ALL CATEGORY - 1 Category ku 5 Prompt - Rotate Aagum! ---
+# Bot1 - Oru category la 100 image - 1,2,3,4,5,1,2,3,4,5 nu infinite rotate aagum - Same photo varaathu!
+IMAGE_PROMPTS = {
+    "Tamil": ["Tamil Nadu temple beautiful", "Tamil girl saree smiling cute Aira style", "Chennai Marina beach sunset", "Madurai Meenakshi temple", "Tamil village kolam festival"],
+    "Love": ["love couple heart romantic cute", "couple holding hands sunset", "heart shape love red", "romantic couple rain", "cute couple smiling"],
+    "God": ["Hindu god temple divine beautiful", "Lord Shiva temple", "Lord Murugan temple", "Goddess Amman temple", "Divine light temple"],
+    "Nature": ["beautiful nature green forest", "mountain river sunset nature", "green forest waterfall", "flower garden beautiful", "nature sunrise peaceful"],
+    "Cat": ["cute cat kitten playing", "white cat cute eyes", "cat sleeping cute", "kitten playing ball", "cat with flower"],
+    "Dog": ["cute dog puppy playing", "golden retriever puppy", "dog smiling happy", "puppy in garden", "dog with ball"],
+    "Food": ["delicious Indian food biryani", "Tamil food dosa idli", "cake chocolate delicious", "fruit fresh colourful", "street food India"],
+    "Cricket": ["cricket stadium match", "cricket batsman batting", "cricket ball bowling", "cricket crowd stadium", "cricket trophy winning"],
+    "Space": ["space stars galaxy rocket", "astronaut space moon", "planet galaxy beautiful", "rocket launch space", "earth from space"],
+    "Story": ["story book magic fantasy", "fairy tale castle", "magic book reading", "story village old", "fantasy forest magic"],
+    "Health": ["yoga meditation peaceful", "healthy food fruits", "fitness gym workout", "morning walk park", "meditation calm"],
+    "Music": ["music concert guitar", "singer singing stage", "piano music beautiful", "Tamil music concert", "guitar playing"],
+    "Movie": ["cinema movie theatre", "movie poster action", "film shooting", "cinema popcorn", "actor movie"],
+    "Temple": ["Hindu temple beautiful architecture", "South Indian temple gopuram", "temple sunset", "temple festival", "temple pond"],
+    "Flower": ["beautiful flower rose", "lotus flower pink", "jasmine flower white", "sunflower yellow", "flower garden colourful"],
+    "Sea": ["sea beach waves blue", "beach sunset beautiful", "ocean wave", "beach palm tree", "sea boat"],
+    "Mountain": ["mountain snow beautiful", "mountain trekking", "Himalaya mountain", "mountain sunrise", "mountain forest"],
+    "River": ["river beautiful flowing", "river sunset", "river bridge", "river boat", "river forest"],
+    "Sky": ["sky clouds blue beautiful", "sunset sky orange", "night sky stars", "rainbow sky", "clouds white"],
+    "Star": ["stars night sky beautiful", "shooting star", "galaxy stars", "star twinkling", "night sky moon stars"],
+    "Moon": ["moon night beautiful full moon", "moon stars night", "crescent moon", "moon over sea", "moon sky"],
+    "Sun": ["sunrise beautiful morning", "sunset orange sky", "sun over sea", "morning sun", "sun rays"],
+    "Bird": ["beautiful bird parrot", "peacock feather", "bird flying sky", "sparrow bird", "kingfisher bird"],
+    "Animal": ["elephant baby cute", "lion king forest", "tiger beautiful", "deer forest", "monkey cute"],
+    "Baby": ["cute baby smiling", "baby playing", "baby sleeping cute", "baby with mother", "baby laughing"],
+    "Teacher": ["teacher classroom teaching", "teacher students school", "teacher book", "school teacher", "teacher happy"],
+    "Student": ["student studying book", "school students happy", "student classroom", "college student", "student graduation"],
+    "Business": ["business meeting office", "business success", "startup office", "money business", "business handshake"],
+    "Money": ["money coins success", "rupees cash", "money saving", "business money", "gold coins"],
+    "Yoga": ["yoga pose meditation", "yoga sunrise", "yoga girl", "yoga beach", "yoga peaceful"],
+    "Meditation": ["meditation peaceful calm", "meditation Buddha", "meditation nature", "meditation sunset", "meditation lotus"],
+    "Fitness": ["fitness gym workout", "running fitness", "fitness girl", "workout dumbbell", "fitness healthy"],
+    "Diet": ["healthy diet salad", "fruits healthy", "vegetables fresh", "healthy food bowl", "diet food"],
+    "Sleep": ["sleeping baby peaceful", "night sleep moon", "bedroom sleep", "sleep cat", "peaceful sleep"],
+    "Beauty": ["beautiful girl smiling", "beauty makeup", "beautiful woman saree", "beauty face", "beautiful eyes"],
+    "Fashion": ["fashion girl saree", "fashion style", "fashion dress", "fashion model", "fashion shopping"],
+    "Game": ["video game playing", "game console", "chess game", "football game", "game fun"],
+    "Sport": ["football match stadium", "sports running", "tennis sport", "sports trophy", "sports training"],
+    "Football": ["football match goal", "football player kicking", "football stadium", "football trophy", "football training"],
+    "Science": ["science laboratory microscope", "scientist lab experiment", "science atom molecule", "science test tube", "science research"],
+    "History": ["history ancient temple", "history fort", "history palace", "history museum", "history old"],
+    "Culture": ["Indian culture festival", "Tamil culture dance", "culture traditional", "culture art", "culture festival"],
+    "Festival": ["Diwali festival lights", "Pongal festival Tamil", "festival celebration", "festival fireworks", "festival dance"],
+    "Marriage": ["Indian wedding couple", "wedding bride saree", "wedding celebration", "wedding couple", "wedding decorations"],
+    "Family": ["happy family together", "family picnic", "family smiling", "family home", "family festival"],
+    "Friendship": ["friends together happy", "friendship group", "friends laughing", "friends travel", "best friends"],
+    "Study": ["study book reading", "student studying library", "study desk", "study notes", "study exam"],
+    "Dream": ["dream clouds sky", "dream fantasy", "dream stars", "dream girl", "dream beautiful"],
+    "Success": ["success trophy winning", "success business", "success celebration", "success goal", "success motivation"],
+    "Motivation": ["motivation sunrise success", "motivation quote", "motivation gym", "motivation book", "motivation mountain"],
+    "Peace": ["peace dove white", "peaceful nature", "peace meditation", "peace sunset", "peaceful lake"],
+    "Courage": ["courage lion brave", "courage mountain", "courage fire", "courage hero", "courage success"],
+    "Kindness": ["kindness helping", "kindness heart", "kindness children", "kindness love", "kindness sharing"],
+    "Truth": ["truth light", "truth book", "truth wisdom", "truth temple", "truth sunrise"],
+    "Wisdom": ["wisdom old book", "wisdom Buddha", "wisdom owl", "wisdom temple", "wisdom light"],
+    "Power": ["power lightning", "power lion", "power fire", "power mountain", "power energy"],
+    "Magic": ["magic fantasy castle", "magic wand", "magic stars", "magic book", "magic forest"],
+    "Luck": ["luck four leaf clover", "luck horseshoe", "luck gold", "luck festival", "luck rainbow"],
+    "Destiny": ["destiny stars fate", "destiny path", "destiny road", "destiny sunset", "destiny dream"],
+    "Karma": ["karma cycle", "karma temple", "karma meditation", "karma Buddha", "karma peace"],
+    "Rain": ["rain monsoon beautiful", "rain drops", "rain umbrella", "rain forest", "rain window"],
+    "Village": ["Indian village beautiful", "village hut", "village field", "village festival", "village sunset"],
+    "City": ["city skyline night", "Chennai city", "city traffic", "city buildings", "city lights"],
+    "Chennai": ["Chennai Marina beach", "Chennai temple", "Chennai city", "Chennai Marina", "Chennai food"],
+    "Madurai": ["Madurai Meenakshi temple", "Madurai city", "Madurai temple festival", "Madurai street", "Madurai food"],
+    "Delhi": ["Delhi India Gate", "Delhi Red Fort", "Delhi city", "Delhi temple", "Delhi street"],
+    "Mumbai": ["Mumbai Gateway of India", "Mumbai city", "Mumbai beach", "Mumbai skyline", "Mumbai street"],
+    "London": ["London Big Ben", "London bridge", "London city", "London tower", "London street"],
+    "Paris": ["Paris Eiffel Tower", "Paris city", "Paris cafe", "Paris sunset", "Paris street"],
+    "Tokyo": ["Tokyo Japan tower", "Tokyo city night", "Tokyo street", "Tokyo sakura", "Tokyo temple"],
+    "New York": ["New York Times Square", "New York city", "New York Statue of Liberty", "New York skyline", "New York street"],
+    "Egypt": ["Egypt pyramids", "Egypt sphinx", "Egypt desert", "Egypt temple", "Egypt Nile"],
+    "Pyramids": ["Pyramids Egypt desert", "Pyramids sunset", "Pyramids ancient", "Pyramids camel", "Pyramids night"],
+    "Taj Mahal": ["Taj Mahal India beautiful", "Taj Mahal sunset", "Taj Mahal marble", "Taj Mahal Agra", "Taj Mahal morning"],
+    "Eiffel Tower": ["Eiffel Tower Paris", "Eiffel Tower sunset", "Eiffel Tower night", "Eiffel Tower city", "Eiffel Tower beautiful"],
+    "Psychology": ["psychology brain mind", "psychology book", "psychology meditation", "psychology brain", "psychology therapy"],
+    "Philosophy": ["philosophy book wisdom", "philosophy Buddha", "philosophy temple", "philosophy thought", "philosophy sunset"],
+    "Economics": ["economics money chart", "economics business", "economics graph", "economics coins", "economics office"],
+    "Politics": ["politics parliament", "politics flag", "politics meeting", "politics India", "politics vote"],
+    "Law": ["law court justice", "law book", "law scales", "law judge", "law building"],
+    "Education": ["education school books", "education graduation", "education classroom", "education library", "education students"],
+    "Happiness": ["happy smiling girl", "happiness family", "happiness friends", "happiness sunset", "happiness dance"],
+    "Smile": ["smiling girl cute", "smile happy", "smile baby", "smile friends", "smile beautiful"],
+    "Heart": ["heart shape red love", "heart hands", "heart cute", "heart pink", "heart love"],
+    "Future": ["future technology robot", "future city", "future space", "future dream", "future sunset"],
+    "Freedom": ["freedom bird flying", "freedom flag", "freedom sky", "freedom dove", "freedom happy"],
+    "Hope": ["hope sunrise", "hope light", "hope rainbow", "hope hands", "hope dream"],
+    "Faith": ["faith temple prayer", "faith light", "faith cross", "faith meditation", "faith hope"],
+    "Japan": ["Japan Tokyo tower", "Japan sakura cherry blossom", "Japan kimono girl", "Japan temple Kyoto", "Japan sushi food"],
+    "Sakura": ["Sakura cherry blossom Japan pink", "Sakura tree Japan", "Sakura petals", "Sakura park Japan", "Sakura spring"],
+    "Kimono": ["Kimono Japanese woman beautiful", "Kimono girl Japan", "Kimono red", "Kimono traditional", "Kimono festival"],
+    "Anime": ["Anime girl cute illustration", "Anime boy cool", "Anime fantasy", "Anime city", "Anime couple"],
+    "Japanese Food": ["Japanese food sushi ramen", "Sushi Japanese", "Ramen Japanese", "Japanese curry", "Japanese tea"],
+    "Sushi": ["Sushi Japanese food plate", "Sushi salmon", "Sushi chef", "Sushi rice", "Sushi beautiful"],
+    "Kyoto": ["Kyoto Japan temple red", "Kyoto torii gate", "Kyoto bamboo forest", "Kyoto street", "Kyoto sakura"],
+    "Osaka": ["Osaka Japan castle", "Osaka street food", "Osaka city night", "Osaka tower", "Osaka temple"],
+    "Japanese Temple": ["Japanese temple Kyoto", "Japanese shrine torii", "Japanese temple sunset", "Japanese temple garden", "Japanese temple snow"],
+    "Japanese Girl": ["Japanese girl kimono smiling", "Japanese girl cute", "Japanese girl portrait", "Japanese girl sakura", "Japanese girl street"],
+    "Samurai": ["Samurai Japan sword", "Samurai warrior", "Samurai armor", "Samurai katana", "Samurai castle"],
+    "Ninja": ["Ninja Japan", "Ninja warrior", "Ninja shadow", "Ninja sword", "Ninja night"],
+    "China": ["China Beijing Great Wall", "China panda cute", "China temple red", "China Shanghai city", "China dragon"],
+    "Beijing": ["Beijing Forbidden City", "Beijing Great Wall", "Beijing temple", "Beijing street", "Beijing city"],
+    "Great Wall": ["Great Wall of China mountain", "Great Wall sunset", "Great Wall ancient", "Great Wall fog", "Great Wall tourist"],
+    "Panda": ["Panda cute baby", "Panda eating bamboo", "Panda smiling", "Panda zoo", "Panda baby"],
+    "Chinese Food": ["Chinese food noodles", "Chinese dim sum", "Chinese rice", "Chinese dumplings", "Chinese restaurant"],
+    "Chinese Temple": ["Chinese temple red lantern", "Chinese temple Beijing", "Chinese temple dragon", "Chinese temple sunset", "Chinese temple garden"],
+    "Shanghai": ["Shanghai city skyline", "Shanghai night", "Shanghai tower", "Shanghai street", "Shanghai river"],
+    "Chinese Culture": ["Chinese culture dragon dance", "Chinese lantern festival", "Chinese tea ceremony", "Chinese calligraphy", "Chinese opera"],
+    "Dragon": ["Chinese dragon festival", "Dragon fire", "Dragon fantasy", "Dragon red", "Dragon temple"],
+    "Chinese Girl": ["Chinese girl hanfu smiling", "Chinese girl cute", "Chinese girl portrait", "Chinese girl traditional", "Chinese girl street"],
+    "India": ["India Taj Mahal", "India temple", "India festival Diwali", "India food biryani", "India village"],
+    "Tamil Nadu": ["Tamil Nadu temple gopuram", "Tamil Nadu Madurai", "Tamil Nadu Chennai", "Tamil Nadu village", "Tamil Nadu dance"],
+    "Kerala": ["Kerala backwaters boat", "Kerala coconut trees", "Kerala Kathakali", "Kerala beach", "Kerala tea plantation"],
+    "Saree": ["Saree Indian woman beautiful", "Saree red bride", "Saree silk", "Saree girl smiling", "Saree traditional"],
+    "Biryani": ["Biryani Indian food plate", "Chicken biryani", "Biryani rice", "Biryani Hyderabadi", "Biryani delicious"],
+    "Diwali": ["Diwali festival lights diya", "Diwali fireworks", "Diwali rangoli", "Diwali family", "Diwali sweets"],
+    "Pongal": ["Pongal festival Tamil pot", "Pongal kolam", "Pongal village", "Pongal sugarcane", "Pongal celebration"],
+    "Indian Temple": ["Indian temple gopuram south", "Indian temple sunset", "Indian temple festival", "Indian temple architecture", "Indian temple pond"],
+    "Indian Food": ["Indian food thali", "Indian dosa", "Indian curry", "Indian sweets", "Indian street food"],
+    "Indian Girl": ["Indian girl saree smiling", "Indian girl cute", "Indian girl portrait", "Indian girl traditional", "Indian girl festival"],
+    "Kolkata": ["Kolkata Howrah bridge", "Kolkata Durga Puja", "Kolkata street", "Kolkata tram", "Kolkata temple"],
+    "Bangalore": ["Bangalore city garden", "Bangalore palace", "Bangalore IT city", "Bangalore park", "Bangalore street"],
+    "Hyderabad": ["Hyderabad Charminar", "Hyderabad biryani", "Hyderabad city", "Hyderabad Golconda", "Hyderabad lake"],
+    "Beach": ["Beach sunset palm", "Beach waves", "Beach sand", "Beach coconut", "Beach boat"],
+    "Forest": ["Forest green trees", "Forest waterfall", "Forest animals", "Forest mist", "Forest path"],
+    "Desert": ["Desert dunes camel", "Desert sunset", "Desert cactus", "Desert night stars", "Desert Rajasthan"],
+    "Snow": ["Snow mountain white", "Snow falling", "Snow winter", "Snow man", "Snow forest"],
+    "Fire": ["Fire flames", "Fire camp", "Fire diya", "Fire fireworks", "Fire sunset"],
+    "Earth": ["Earth planet space", "Earth globe", "Earth nature", "Earth green", "Earth sunrise"],
+    "Water": ["Water drops", "Water waterfall", "Water lake", "Water ocean", "Water glass"],
+    "Coffee": ["Coffee cup hot", "Coffee latte art", "Coffee beans", "Coffee cafe", "Coffee morning"],
+    "Tea": ["Tea cup masala", "Tea plantation", "Tea green", "Tea pouring", "Tea evening"],
+    "Cake": ["Cake chocolate birthday", "Cake slice", "Cake strawberry", "Cake baking", "Cake celebration"],
+    "Pizza": ["Pizza cheese", "Pizza oven", "Pizza slice", "Pizza Italian", "Pizza delicious"],
+    "Burger": ["Burger cheese", "Burger fries", "Burger fast food", "Burger delicious", "Burger chicken"],
+    "Chocolate": ["Chocolate dark", "Chocolate cake", "Chocolate box", "Chocolate melting", "Chocolate sweets"],
+    "Fruit": ["Fruits fresh mango", "Fruits apple", "Fruits banana", "Fruits strawberry", "Fruits basket"],
+    "Vegetable": ["Vegetables fresh green", "Vegetables market", "Vegetables tomato", "Vegetables farm", "Vegetables salad"],
+    "Summer": ["Summer beach sun", "Summer ice cream", "Summer sun", "Summer mango", "Summer vacation"],
+    "Winter": ["Winter snow sweater", "Winter fog", "Winter morning", "Winter bonfire", "Winter hills"],
+    "Monsoon": ["Monsoon rain clouds", "Monsoon umbrella", "Monsoon window rain", "Monsoon green", "Monsoon chai"],
+    "Morning": ["Morning sunrise tea", "Morning yoga", "Morning mist", "Morning birds", "Morning coffee"],
+    "Night": ["Night stars moon", "Night city lights", "Night sky", "Night lamp", "Night peaceful"],
+    "Home": ["Home cozy living room", "Home garden", "Home kitchen", "Home warm", "Home family"],
+    "Garden": ["Garden flowers beautiful", "Garden green", "Garden roses", "Garden bench", "Garden sunset"],
+    "Park": ["Park green trees", "Park children playing", "Park bench", "Park morning walk", "Park flowers"],
+    "Elephant": ["Elephant baby cute", "Elephant temple Kerala", "Elephant forest", "Elephant family", "Elephant water"],
+    "Tiger": ["Tiger forest beautiful", "Tiger cub", "Tiger roaring", "Tiger jungle", "Tiger eyes"],
+    "Lion": ["Lion king mane", "Lion roaring", "Lion family", "Lion safari", "Lion cub"],
+    "Horse": ["Horse white running", "Horse brown", "Horse riding", "Horse farm", "Horse sunset"],
+    "Bike": ["Bike Royal Enfield", "Bike rider", "Bike road", "Bike sunset", "Bike racing"],
+    "Car": ["Car luxury", "Car road trip", "Car red", "Car vintage", "Car sunset"],
+    "Train": ["Train Indian railways", "Train journey", "Train station", "Train sunset", "Train mountain"],
+    "Flight": ["Flight airplane sky", "Flight takeoff", "Flight window clouds", "Flight sunset", "Flight airport"],
+    "Phone": ["Phone smartphone", "Phone holding", "Phone camera", "Phone new", "Phone desk"],
+    "Computer": ["Computer laptop coding", "Computer desk", "Computer gaming", "Computer keyboard", "Computer screen"],
+    "Book": ["Book reading library", "Book open", "Book stack", "Book coffee", "Book story"],
+    "Kavithai": ["Kavithai Tamil poetry", "Poetry book", "Poetry pen", "Poetry sunset", "Poetry love"],
+    "Thirukkural": ["Thirukkural Tamil book", "Thiruvalluvar statue", "Tamil book old", "Thirukkural temple", "Tamil palm leaf"],
+    "Pazhamozhi": ["Pazhamozhi Tamil proverb", "Tamil village old", "Tamil grandmother story", "Tamil culture", "Tamil book"],
+    "Joke": ["Joke funny laughing", "Comedy laughing", "Funny clown", "Funny meme", "Laughing friends"],
+    "Reading": ["Reading book library", "Reading girl", "Reading coffee book", "Reading night", "Reading park"],
+    "Writing": ["Writing pen diary", "Writing book", "Writing letter", "Writing desk", "Writing poetry"],
+    "Poetry": ["Poetry book pen", "Poetry sunset", "Poetry love", "Poetry rose", "Poetry rain"],
+    "Singing": ["Singing microphone stage", "Singing girl", "Singing concert", "Singing karaoke", "Singing choir"],
+    "Dancing": ["Dancing Bharatanatyam", "Dancing couple", "Dancing stage", "Dancing festival", "Dancing happy"],
+}
+
+def get_infinite_prompt(cat, n):
+    # n = 1..100 - 5 prompt rotate infinite - 1,2,3,4,5,1,2,3,4,5...
+    lst = IMAGE_PROMPTS.get(cat)
+    if not lst:
+        return cat
+    return lst[(n-1) % len(lst)]
+
 def search_term(cat):
     return SEARCH_MAP.get(cat, cat)
 
@@ -154,23 +333,36 @@ def bot1_image_worker():
             pool = uniq
             print(f"Bot1 - {cat} - Pool {len(pool)} - Start 100 loop", flush=True)
             # FIX: Oru category ku 100/100 varaikkum angaye iru! 7/100 illa!
+            # INFINITE PROMPT: 5 prompt rotate - cache per prompt
+            prompt_cache = {}
+            def get_pool_for_prompt(prompt_text):
+                if prompt_text in prompt_cache: return prompt_cache[prompt_text]
+                pool2 = []
+                for pp in [1,2]:
+                    pool2 += fetch_openverse(prompt_text, page=pp)
+                    time.sleep(0.5)
+                pool2 += fetch_wikimedia(prompt_text)
+                seen2 = set(); uniq2 = []
+                for u in pool2:
+                    if u not in seen2: seen2.add(u); uniq2.append(u)
+                prompt_cache[prompt_text] = uniq2
+                return uniq2
             for n in range(1, 101):
                 try:
-                    if pool:
-                        url = pool[(n-1) % len(pool)]
-                        src = "Openverse" if "openverse" in url.lower() or "flickr" in url.lower() or "wordpress" in url.lower() or "http" in url else "Wikimedia"
+                    prompt_now = get_infinite_prompt(cat, n)
+                    pool_now = get_pool_for_prompt(prompt_now)
+                    if pool_now:
+                        url = pool_now[(n-1) % len(pool_now)]
                         if "commons.wikimedia" in url: src = "Wikimedia"
                         elif "unsplash" in url: src = "Unsplash"
                         else: src = "Openverse"
                     else:
-                        # Fallback - Unsplash Source - No watermark
-                        url = f"https://source.unsplash.com/800x600/?{q.replace(' ','%20')}"
+                        url = f"https://source.unsplash.com/800x600/?{prompt_now.replace(' ','%20')}"
                         src = "Unsplash"
-                    # Every 10th - Unsplash extra variety
                     if n % 10 == 0:
-                        url = f"https://source.unsplash.com/800x600/?{q.replace(' ','%20')}"
+                        url = f"https://source.unsplash.com/800x600/?{prompt_now.replace(' ','%20')}"
                         src = "Unsplash"
-                    send_to_channel(f"Auto Image - {cat} - {n}/100 📸\nSource: {src} - No Watermark - Made by Aira H1 ❤️\n{url}", BOT1_TOKEN, "Bot1-Image")
+                    send_to_channel(f"Auto Image - {cat} - {n}/100 | Prompt: {prompt_now} 📸\nSource: {src} - No Watermark - Made by Aira H1 ❤️\n{url}", BOT1_TOKEN, "Bot1-Image")
                     save_github(f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {src} - {url}")
                     print(f"Bot1 - {cat} - {n}/100 Done!", flush=True)
                     time.sleep(2)  # Slow - 2 sec ku 1 image - Spam illa
