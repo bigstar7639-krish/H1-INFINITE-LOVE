@@ -410,20 +410,58 @@ def self_heal_loop():
             print(f"Self-Heal Check - Count {count} - Repo {CURRENT_REPO[0]} - Users {len(USER_MEMORY)} - OK", flush=True)
             save_github(f"heartbeat-{datetime.now().strftime('%Y-%m-%d')}.txt", f"Alive - {datetime.now()} - Count {count} - Repo {CURRENT_REPO[0]}")
         except Exception as e: print(f"Self-Heal error {e}", flush=True); time.sleep(30)
+
+# --- SINGLE INSTANCE GUARD - Main Double Stop! - Worker Mathiri ---
+def check_other_instance_main():
+    try:
+        from datetime import datetime as _dt
+        import re as _re
+        url = f"https://api.github.com/repos/{GITHUB_USER}/{CURRENT_REPO[0]}/contents/data/heartbeat-{_dt.now().strftime('%Y-%m-%d')}.txt"
+        r = requests.get(url, headers={"Authorization": f"token {GITHUB_TOKEN}"}, timeout=10)
+        if r.status_code == 200:
+            content = base64.b64decode(r.json().get("content","")).decode(errors="ignore")
+            last_line = content.strip().split("\n")[-1]
+            m = _re.search(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", last_line)
+            if m:
+                last_dt = _dt.strptime(m.group(1), "%Y-%m-%d %H:%M:%S")
+                diff = (_dt.now() - last_dt).total_seconds()
+                print(f"Single-Instance Check Main - Last Heartbeat {diff:.0f} sec ago", flush=True)
+                if diff < 120:
+                    print("Single-Instance GUARD Main: Vera Main Bot Oduthu! Wait...", flush=True)
+                    return False
+    except Exception as e:
+        print(f"Single-Instance Check Main Error {e} - Continue", flush=True)
+    return True
+def wait_for_single_instance_main():
+    for attempt in range(3):
+        if check_other_instance_main():
+            print("Single-Instance GUARD Main: OK - Naan Mattum Thaan!", flush=True)
+            return True
+        print(f"Single-Instance GUARD Main: Wait {attempt+1}/3 - 90 sec...", flush=True)
+        time.sleep(90)
+    print("Single-Instance GUARD Main: Vera Bot Oduthu - Naan Exit!", flush=True)
+    import sys; sys.exit(0)
+
 if __name__ == "__main__":
-    print("AIRAH1 FINAL INFINITE - Work Aagum Mattum - Started", flush=True)
+    print("AIRAH1 FINAL V4 MAIN - Started", flush=True)
+    # V4: Port First!
+    def start_http():
+        try:
+            from http.server import HTTPServer, BaseHTTPRequestHandler
+            class H(BaseHTTPRequestHandler):
+                def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Final V4 Main ON")
+                def do_HEAD(self): self.send_response(200); self.end_headers()
+                def log_message(self,*a): pass
+            HTTPServer(("0.0.0.0", int(os.getenv("PORT","10000"))), H).serve_forever()
+        except Exception as e: print(f"HTTP Error {e}", flush=True)
+    threading.Thread(target=start_http, daemon=True).start()
+    print("HTTP Server Started - Port Open!", flush=True)
+    wait_for_single_instance_main()
+    print("AIRAH1 FINAL V4 MAIN - Single OK - Threads Start!", flush=True)
     threading.Thread(target=infinite_loop, daemon=True).start()
     threading.Thread(target=listen_loop, daemon=True).start()
     threading.Thread(target=books_loop, daemon=True).start()
     threading.Thread(target=knowledge_loop, daemon=True).start()
     threading.Thread(target=daily_loop, daemon=True).start()
     threading.Thread(target=self_heal_loop, daemon=True).start()
-    try:
-        from http.server import HTTPServer, BaseHTTPRequestHandler
-        class H(BaseHTTPRequestHandler):
-            def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Final Infinite ON")
-            def do_HEAD(self): self.send_response(200); self.end_headers()
-            def log_message(self,*a): pass
-        HTTPServer(("0.0.0.0", int(os.getenv("PORT","10000"))), H).serve_forever()
-    except:
-        while True: time.sleep(60)
+    while True: time.sleep(60)
