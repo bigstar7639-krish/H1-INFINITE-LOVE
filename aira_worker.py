@@ -1,4 +1,4 @@
-# AIRAH1 - FINAL - Worker - 100/100 + No Watermark + Japan + China + India + Infinite Source + Infinite Repo + do_HEAD
+# AIRAH1 - FINAL V4 - Worker - Port First + Single Guard - 100/100 + No Watermark + Japan + China + India + Infinite Source + Infinite Repo + do_HEAD
 # File: aira_worker.py - Start: python3 -u aira_worker.py
 # NO Pollinations! NO Google / Instagram / Facebook scraping! Only FREE legal sources - No Watermark!
 import os, time, threading, requests, base64, random, html, re
@@ -473,19 +473,26 @@ def wait_for_single_instance():
 
 
 if __name__ == "__main__":
+    print("AIRAH1 WORKER FINAL V4 - Started - Data Channel!", flush=True)
+    # V4 FIX: Port First! - Render ku Port Udaney Kedaikkanum - Guard Wait Panna Kooda Port Open Irukkanum!
+    def start_http():
+        try:
+            from http.server import HTTPServer, BaseHTTPRequestHandler
+            class H(BaseHTTPRequestHandler):
+                def do_GET(self):
+                    self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Worker Final V4 ON")
+                def do_HEAD(self):
+                    self.send_response(200); self.end_headers()
+                def log_message(self,*a): pass
+            HTTPServer(("0.0.0.0", int(os.getenv("PORT","10000"))), H).serve_forever()
+        except Exception as e:
+            print(f"HTTP Error {e}", flush=True)
+    threading.Thread(target=start_http, daemon=True).start()
+    print("HTTP Server Started - Port Open - Render OK!", flush=True)
+    # Guard Next - Double Stop!
     wait_for_single_instance()
-    print("AIRAH1 WORKER FINAL INFINITE - Started - Data Channel!", flush=True)
+    print("AIRAH1 WORKER FINAL V4 - Single Instance OK - Workers Start!", flush=True)
     threading.Thread(target=bot1_image_worker, daemon=True).start()
     threading.Thread(target=bot2_knowledge_worker, daemon=True).start()
     threading.Thread(target=self_heal, daemon=True).start()
-    try:
-        from http.server import HTTPServer, BaseHTTPRequestHandler
-        class H(BaseHTTPRequestHandler):
-            def do_GET(self):
-                self.send_response(200); self.end_headers(); self.wfile.write(b"AIRAH1 Worker Final Infinite ON")
-            def do_HEAD(self):
-                self.send_response(200); self.end_headers()
-            def log_message(self,*a): pass
-        HTTPServer(("0.0.0.0", int(os.getenv("PORT","10000"))), H).serve_forever()
-    except:
-        while True: time.sleep(60)
+    while True: time.sleep(60)
