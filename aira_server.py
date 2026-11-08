@@ -174,7 +174,7 @@ def download_book(key):
     return None, "Book illa da - 'Aira, book list sollu' nu kelu!"
 
 def read_book_infinite(key, chars=800):
-    # PARAGRAPH MODE - Oru thadava 1 PARAGRAPH - Full Paragraph - Single Single illa
+    # PARAGRAPH MODE - Oru thadava 1 PARAGRAPH - Single Single illa
     txt, status = download_book(key)
     if not txt:
         return status
@@ -476,15 +476,21 @@ def infinite_loop():
             elif typ == "Business": msg = f"Business Idea {count} - {random.choice(BUSINESS_IDEAS)}"; print(f"Business {count}", flush=True)
             elif typ == "Movie": msg = f"Movie {count} - {random.choice(MOVIES)}"; print(f"Movie {count}", flush=True)
             elif typ == "Recipe": msg = f"Recipe {count} - {random.choice(RECIPES)}"; print(f"Recipe {count}", flush=True)
-            elif typ == "Q": msg = f"Q {count} - {random.choice(QUESTIONS).format(t=t)}"; print(f"Q {count} - {t}", flush=True)
+            elif typ == "Q":
+                # Q+A PARAGRAPH TRAINING - Question + Answer - Orey Paragraph la - Single Single illa
+                _q = random.choice(QUESTIONS).format(t=t)
+                _a = ai_answer(_q, allow_groq=False)
+                # Q+A - Orey Paragraph - Train pannura format
+                msg = f"Q+A Training - {t}\n\nQuestion: {_q}\n\nAnswer: {_a}"
+                print(f"Q+A Paragraph {count} - {t}", flush=True)
             elif typ == "AI Q":
-                q = random.choice(QUESTIONS).format(t=t); print(f"AI Q {count} - {q}", flush=True); msg = f"Aira AI: {ai_answer(q, allow_groq=False)}"
+                q = random.choice(QUESTIONS).format(t=t); print(f"AI Q {count} - {q}", flush=True); msg = f"Q+A Training - {t}\n\nQuestion: {q}\n\nAnswer: {ai_answer(q, allow_groq=False)}"
             elif typ in ("Story","World Story"): msg = f"{typ} {count}\n{make_story()}"; print(f"{typ} {count}", flush=True)
             elif typ == "Joke": msg = f"Joke {count}\n{random.choice(JOKES)}"; print(f"Joke {count}", flush=True)
             elif typ == "Fact": fact_count += 1; msg = f"Fact {fact_count} - {random.choice(FACTS)}"; print(f"Fact {fact_count}", flush=True)
             elif typ == "Quote": msg = f"Quote {count} - {get_quote()}"; print(f"Quote {count}", flush=True)
             elif typ == "Coding Q":
-                q = random.choice(CODING_Q); msg = f"Coding Q {count} - {q}\nAira: {ai_answer(q, allow_groq=False)}"; print(f"Coding Q {count}", flush=True)
+                q = random.choice(CODING_Q); msg = f"Q+A Training - Coding\n\nQuestion: {q}\n\nAnswer: {ai_answer(q, allow_groq=False)}"; print(f"Coding Q {count}", flush=True)
             elif typ == "Emotion Q":
                 emo = random.choice(list(EMOTIONS.keys())); msg = f"Emotion Q {count} - {emo}?\nAira: {random.choice(EMOTIONS[emo])}"; print(f"Emotion Q {count} - {emo}", flush=True)
             elif typ == "Talk": msg = f"Talk {count} - {t} pathi pesalama? Sollu!"; print(f"Talk {count}", flush=True)
