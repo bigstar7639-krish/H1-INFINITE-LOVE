@@ -3,7 +3,14 @@
 import os, random, time, threading, requests, base64, re, html
 from datetime import datetime
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN","") or os.getenv("BOT_TOKEN","") or os.getenv("BOT_TOKEN_2","")
-GROQ_KEYS = [os.getenv("GROQ_API_KEY",""), os.getenv("GROQ_API_KEY_2",""), os.getenv("GROQ_API_KEY_3","")]
+GROQ_KEYS = [os.getenv("GROQ_API_KEY",""), os.getenv("GROQ_API_KEY_2",""), os.getenv("GROQ_API_KEY_3",""), os.getenv("GROQ_API_KEY_4",""), os.getenv("GROQ_API_KEY_5","")]
+GROQ_KEYS = [k for k in GROQ_KEYS if k]
+GEMINI_KEYS = [os.getenv("GEMINI_API_KEY",""), os.getenv("GEMINI_API_KEY_2","")]
+GEMINI_KEYS = [k for k in GEMINI_KEYS if k]
+# Groq 429 vantha thirumba try panna koodathu - cooldown
+import threading as _th
+_GROQ_COOLDOWN_UNTIL = [0]
+_GROQ_LOCK = _th.Lock()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN","")
 GITHUB_USER = "bigstar7639-krish"
 count = 0
@@ -137,27 +144,58 @@ def get_quote():
     except: pass
     return random.choice(QUOTES)
 
-# ===== FULL RANDOM FIX - AI FIRST =====
-def ai_answer(q):
-    # 1. FIRST - GROQ - Full Random ku
-    for key in GROQ_KEYS:
-        if not key: continue
-        try:
-            r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {key}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple. User: {q}"}]}, timeout=15)
-            if r.status_code==200:
-                print("AI Answer - Groq - OK", flush=True)
-                return r.json()["choices"][0]["message"]["content"][:1200]
-            else:
-                print(f"AI Answer - Groq Fail {r.status_code}", flush=True)
-        except Exception as e: print(f"AI Groq Error {e}", flush=True); pass
-    # 2. Groq fail aana - Canned Backup mattum
+# ===== FULL RANDOM FIX - AI FIRST + GEMINI BACKUP + 429 FIX =====
+def gemini_answer(q):
+    for key in GEMINI_KEYS:
+        for model in ["gemini-2.0-flash","gemini-1.5-flash"]:
+            try:
+                r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}", json={"contents":[{"parts":[{"text":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple, 4-6 lines. User: {q}"}]}]}, timeout=15)
+                if r.status_code==200:
+                    print(f"AI Answer - Gemini {model} - OK", flush=True)
+                    return r.json()["candidates"][0]["content"]["parts"][0]["text"][:1200]
+                else:
+                    print(f"AI Answer - Gemini Fail {r.status_code}", flush=True)
+            except Exception as e: print(f"AI Gemini Error {e}", flush=True); pass
+    return None
+
+def ai_answer(q, allow_groq=True):
+    import time as _time
+    # 1. GROQ - but 429 cooldown la iruntha skip pannu - quota va kaapathu
+    if allow_groq and _time.time() >= _GROQ_COOLDOWN_UNTIL[0]:
+        for key in GROQ_KEYS:
+            try:
+                r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {key}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple. User: {q}"}]}, timeout=15)
+                if r.status_code==200:
+                    print("AI Answer - Groq - OK", flush=True)
+                    return r.json()["choices"][0]["message"]["content"][:1200]
+                elif r.status_code==429:
+                    print("AI Answer - Groq Fail 429 - Cooldown 60s + Gemini ku po", flush=True)
+                    _GROQ_COOLDOWN_UNTIL[0] = _time.time() + 60
+                    break
+                else:
+                    print(f"AI Answer - Groq Fail {r.status_code}", flush=True)
+            except Exception as e: print(f"AI Groq Error {e}", flush=True); pass
+    else:
+        if allow_groq: print("AI Answer - Groq Cooldown - Gemini ku po", flush=True)
+    # 2. GEMINI BACKUP - Groq fail aana inge varum, reply varama pogathu
+    g = gemini_answer(q)
+    if g: return g
+    # 3. WIKI BACKUP - Gemini yum fail aana
+    try:
+        for t in KNOWLEDGE_TOPICS:
+            if t.lower() in q.lower():
+                wk = get_wiki(t)
+                if wk: return wk
+    except: pass
+    # 4. LAST - Meaningful fallback, summa "Nalla question" nu mattum illa
     low = q.lower()
     words = re.findall(r"[a-z]+", low.replace("aira"," "))
     for k,v in CODING_A.items():
         if k in words: return v
     for k,v in EMOTIONS.items():
         if k in words: return random.choice(v)
-    return f"{q} - Nalla question! Daily try pannu - Jeyichiduva! 💜"
+    # Kelviya paathu oru line answer - reply varama pogathu
+    return f"Aira: {q} - Itha paathi naan yosichen! {random.choice(['Unakku puriyura maari solluren - ', 'Kelvi super - ', 'Ithu mukkiyamana vishayam - '])}Ne konjam detail ah ketta, naan full ah explain pannuren! Ne enna paathi kekkura nu sollu - Example: History ah? Science ah? Love ah? 💜"
 
 def calc(text):
     try:
@@ -261,13 +299,13 @@ def infinite_loop():
             elif typ == "Recipe": msg = f"Recipe {count} - {random.choice(RECIPES)}"; print(f"Recipe {count}", flush=True)
             elif typ == "Q": msg = f"Q {count} - {random.choice(QUESTIONS).format(t=t)}"; print(f"Q {count} - {t}", flush=True)
             elif typ == "AI Q":
-                q = random.choice(QUESTIONS).format(t=t); print(f"AI Q {count} - {q}", flush=True); msg = f"Aira AI: {ai_answer(q)}"
+                q = random.choice(QUESTIONS).format(t=t); print(f"AI Q {count} - {q}", flush=True); msg = f"Aira AI: {ai_answer(q, allow_groq=False)}"
             elif typ in ("Story","World Story"): msg = f"{typ} {count}\n{make_story()}"; print(f"{typ} {count}", flush=True)
             elif typ == "Joke": msg = f"Joke {count}\n{random.choice(JOKES)}"; print(f"Joke {count}", flush=True)
             elif typ == "Fact": fact_count += 1; msg = f"Fact {fact_count} - {random.choice(FACTS)}"; print(f"Fact {fact_count}", flush=True)
             elif typ == "Quote": msg = f"Quote {count} - {get_quote()}"; print(f"Quote {count}", flush=True)
             elif typ == "Coding Q":
-                q = random.choice(CODING_Q); msg = f"Coding Q {count} - {q}\nAira: {ai_answer(q)}"; print(f"Coding Q {count}", flush=True)
+                q = random.choice(CODING_Q); msg = f"Coding Q {count} - {q}\nAira: {ai_answer(q, allow_groq=False)}"; print(f"Coding Q {count}", flush=True)
             elif typ == "Emotion Q":
                 emo = random.choice(list(EMOTIONS.keys())); msg = f"Emotion Q {count} - {emo}?\nAira: {random.choice(EMOTIONS[emo])}"; print(f"Emotion Q {count} - {emo}", flush=True)
             elif typ == "Talk": msg = f"Talk {count} - {t} pathi pesalama? Sollu!"; print(f"Talk {count}", flush=True)
