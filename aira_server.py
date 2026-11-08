@@ -1,5 +1,4 @@
-# AIRAH1 - FINAL 0.2 SEC - Main Bot - Full Random AI First + DATA MODE 0.2s + Emotions Infinite + Books Infinite
-# File: aira_server.py - Start: python3 -u aira_server.py
+# AIRAH1 - FINAL - Main Bot - Full Random AI First + 10sec Kept + Quiz Fix + Festival + do_HEAD
 # File: aira_server.py - Start: python3 -u aira_server.py
 import os, random, time, threading, requests, base64, re, html
 from datetime import datetime
@@ -144,6 +143,8 @@ BOOKS_FULL = {
   "atomic habits": {"title":"Atomic Habits - James Clear","url":"","free":False,"lang":"English"},
 }
 BOOKS_CACHE = {}  # book_key -> full text
+BOOKS_PARAS = {}
+BOOKS_PARA_IDX = {}
 BOOKS_POS = {}  # book_key -> current read position (infinite reading)
 
 def download_book(key):
@@ -173,18 +174,37 @@ def download_book(key):
     return None, "Book illa da - 'Aira, book list sollu' nu kelu!"
 
 def read_book_infinite(key, chars=800):
-    # Infinite Reading - Oru thadava 800 chars, Adutha thadava adutha 800 - Mudinja thirumba start
+    # PARAGRAPH MODE - Oru thadava 1 PARAGRAPH - Full Paragraph - Single Single illa
     txt, status = download_book(key)
-    if not txt: return status
-    # Find key
+    if not txt:
+        return status
     real_key = [k for k in BOOKS_FULL if k in key or key in k][0]
-    pos = BOOKS_POS.get(real_key, 0)
-    if pos >= len(txt): pos = 0  # Infinite - Mudinja thirumba first la irunthu
-    chunk = txt[pos:pos+chars]
-    BOOKS_POS[real_key] = pos + chars
-    # Clean - Paragraph break la niruthu
-    chunk = chunk.replace("\r","").strip()
-    return f"📖 {BOOKS_FULL[real_key]['title']} - Page {pos//chars+1} - Infinite Reading 💜\n\n{chunk}\n\nAdutha Page venumna: 'Aira, {real_key} continue pannu' nu sollu!"
+    if real_key not in BOOKS_PARAS:
+        raw = txt.replace(chr(13)+chr(10), chr(10))
+        parts = [pp.strip() for pp in raw.split(chr(10)+chr(10))]
+        merged = []
+        cur = ''
+        for pp in parts:
+            if len(pp) < 20:
+                continue
+            if len(cur) + len(pp) < 900:
+                cur = (cur + ' ' + pp).strip() if cur else pp
+            else:
+                if cur:
+                    merged.append(cur)
+                cur = pp
+        if cur:
+            merged.append(cur)
+        BOOKS_PARAS[real_key] = merged
+        BOOKS_PARA_IDX[real_key] = 0
+        print('Paragraph Split - ' + real_key + ' - ' + str(len(merged)) + ' Paragraphs', flush=True)
+    paras = BOOKS_PARAS[real_key]
+    idx = BOOKS_PARA_IDX.get(real_key, 0)
+    if idx >= len(paras):
+        idx = 0
+    para = paras[idx]
+    BOOKS_PARA_IDX[real_key] = idx + 1
+    return 'PARAGRAPH ' + str(idx+1) + '/' + str(len(paras)) + ' - ' + BOOKS_FULL[real_key]['title'] + chr(10) + chr(10) + para
 
 def answer_from_book(question, book_key):
     # Book la irunthu Question Answer - RAG style - Book chunk ah AI kitta kuduthu answer
@@ -203,7 +223,7 @@ def answer_from_book(question, book_key):
             best_score = score; best = txt[i:i+2000]
     if best_score == 0: best = txt[0:2000]
     # AI kitta book chunk + question kuduthu answer vaangu
-    prompt = f"You are Aira. Book: {BOOKS_FULL[book_key]['title']}. Book Content: {best[:3000]}. Question: {question}. Answer in Tanglish, 5 lines, from book only. Book la illa na - 'Book la illa da' nu sollu."
+    prompt = f"You are Aira. Book: {BOOKS_FULL[book_key]['title']}. Book Content: {best[:3000]}. Question: {question}. Answer in Tanglish, as ONE PARAGRAPH - 4-5 lines together, not single single lines, not bullets, from book only. Book la illa na - 'Book la illa da' nu sollu."
     # Use existing Groq/Gemini via ai_answer logic - call Groq directly
     for k in GROQ_KEYS if 'GROQ_KEYS' in globals() else [os.getenv("GROQ_API_KEY",""), os.getenv("GROQ_API_KEY_2",""), os.getenv("GROQ_API_KEY_3","")]:
         if not k: continue
@@ -215,8 +235,8 @@ def answer_from_book(question, book_key):
     return f"📚 Book la irunthu: {best[:800]}"
 
 def book_infinite_loop():
-    # DATA MODE - 0.2 sec ku 1 Page - Padikka Illa - Aira Train panna DATA Edukka
-    # Telegram ku Anuppa Maatom - GitHub la Mattum Save - Illana Telegram Block Pannidum (429)
+    # ULTRA FAST DATA MODE - 0.2 sec ku 1 Page - 5x Faster - Padikka Illa - Aira Train panna DATA Edukka
+    # Telegram ku Anuppa Maatom - GitHub la Mattum Save Pannuvom - Illana Telegram Block Pannidum (429)
     import random as _r
     free_books = [k for k,v in BOOKS_FULL.items() if v["free"]]
     idx = 0
@@ -229,11 +249,11 @@ def book_infinite_loop():
             # DATA Save - GitHub la Save - Telegram ku Anuppa Koodathu
             save_github(f"book-data-{key}-{page_count[0]}.txt", msg)
             print(f"Book DATA - {key} - Page {page_count[0]} - Saved for Training", flush=True)
-            # 100 Pages ku oru thadava mattum Telegram la Progress
+            # 100 Pages ku oru thadava mattum Telegram la Progress solluvom - Spam aagathu
             if page_count[0] % 100 == 0:
                 send_telegram(f"📚 Aira Training - {key} - {page_count[0]} Pages Data Ready! Train Panniten!", BOOKS_ID)
             time.sleep(0.2)  # ULTRA FAST - 0.2 sec ku 1 Page = 5 Pages per sec - DATA MODE
-        except Exception as e: print(f"Book Infinite error {e}", flush=True); time.sleep(1)
+        except Exception as e: print(f"Book Infinite error {e}", flush=True); time.sleep(60)
 
 # Book Commands in ai_reply - Add before return
 
@@ -308,7 +328,7 @@ def gemini_answer(q):
     for key in GEMINI_KEYS:
         for model in ["gemini-1.5-flash","gemini-1.5-flash-latest","gemini-2.5-flash"]:
             try:
-                r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}", json={"contents":[{"parts":[{"text":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple, 4-6 lines. User: {q}"}]}]}, timeout=15)
+                r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}", json={"contents":[{"parts":[{"text":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly. Answer as ONE PARAGRAPH - 4-6 lines together in one paragraph, not single single lines, not bullet list. User: {q}"}]}]}, timeout=15)
                 if r.status_code==200:
                     print(f"AI Answer - Gemini {model} - OK", flush=True)
                     return r.json()["candidates"][0]["content"]["parts"][0]["text"][:1200]
@@ -323,7 +343,7 @@ def ai_answer(q, allow_groq=True):
     if allow_groq and _time.time() >= _GROQ_COOLDOWN_UNTIL[0]:
         for key in GROQ_KEYS:
             try:
-                r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {key}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple. User: {q}"}]}, timeout=15)
+                r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {key}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly. Answer as ONE PARAGRAPH - together, not single single lines. User: {q}"}]}, timeout=15)
                 if r.status_code==200:
                     print("AI Answer - Groq - OK", flush=True)
                     return r.json()["choices"][0]["message"]["content"][:1200]
