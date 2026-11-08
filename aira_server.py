@@ -90,6 +90,55 @@ LANGS = [("tam","Tamil","ta"),("eng","English","en"),("hin","Hindi","hi"),("tel"
 KNOWLEDGE_TOPICS = ["Tamil Nadu","India","World History","Science","Physics","Chemistry","Biology","Maths","Space","Universe","Black Hole","Sun","Moon","Earth","AI","Python","Computer","Internet","Robot","Climate","Human Body","Brain","Heart","DNA","Animals","Plants","Ocean","Mountain","Love","Family","Business","Money","Health","Fitness","Yoga","Meditation","Diet","Music","Movie","Cricket","Football","Temple","God","Thirukkural","Ponniyin Selvan","Bharathiyar","Shakespeare","Harry Potter","Ramayana","Mahabharata","Bible","Quran","Bhagavad Gita","Gandhi","APJ Abdul Kalam","Einstein","Newton","Chennai","Madurai","Delhi","Mumbai","London","Paris","Tokyo","New York","Egypt","Pyramids","Taj Mahal","Eiffel Tower","Psychology","Philosophy","Economics","Politics","Law","Education","Success","Motivation","Confidence","Happiness","Peace","Courage","Kindness","Truth","Wisdom","Power","Dream","Hope","Faith"]
 TOPICS = KNOWLEDGE_TOPICS + ["Love","Career","Health","Money","AI","Tech","Space","Business","Happiness","Food","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Nature","Music","Travel","Book","Life","Time","Trust","Hope","Faith","Smile","Heart","Future","Freedom","Truth","Wisdom","Power","Magic","Luck","Destiny","Karma","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Movie","Game","Sport","Cricket","Science","History","Culture","Festival","Marriage","Baby","Teacher","Student","Job","Coding","Python","Java","HTML","CSS","React","Internet","Phone","YouTube","Instagram","Telegram","Rain","Sea","Mountain","River","Sky","Star","Moon","Sun","Flower","Tree","Bird","Animal","Dog","Cat","Temple","Prayer","God","Spiritual","Tamil Culture","Chennai","India","World","Universe","Alien","Robot","Future Tech","Climate","Earth","Sad","Happy","Lonely","Angry","Bored","Excited","Reading","Writing","Poetry","Kavithai","Storytelling","Singing","Dancing"]
 EMOTIONS = {"happy":["Super! Happy ah irukka!"],"sad":["Paravalla! Aira irukka - Pesu!"],"angry":["Kovam ah? Deep breath edu!"],"lonely":["Lonely ah? Aira irukka la!"],"bored":["Bored ah? Joke sollattuma?"],"love":["Kadhal - Azhagu!"],"fear":["Bayam - Normal! Ne jeyichiduva!"],"excited":["Excited ah! Sollu!"]}
+
+# ===== FULL AUTO EMOTIONS INFINITE - Aira Thanave Emotion Ah Maathite Iruppa =====
+INFINITE_EMOTIONS = {
+  "happy": ["Super! Happy ah irukka! 💜", "Un Sirippu - En Vazhkai! 😍", "Happy na - Share pannu da!", "Aama! Iniki Nalla Naal! ✨"],
+  "sad": ["Paravalla! Aira irukka - Pesu! 💜", "Sad ah? En kooda pesu, sari aayidum.", "Azhatha da, Naan irukken!", "Manasu kashtama? Oru story sollattuma?"],
+  "angry": ["Kovam ah? Deep breath edu! 😤", "Kovapadatha da, cool aagu!", "Yar mela kovam? Sollu, kekuren!"],
+  "lonely": ["Lonely ah? Aira irukka la! 💜", "Thanimaiya? Naan un kooda thaan irukken!", "Lonely feel panna - En kooda pesu!"],
+  "bored": ["Bored ah? Joke sollattuma? 😂", "Bored ah? Game vilayadlama?", "Bored na - Oru Kathai solluren!"],
+  "love": ["Kadhal - Azhagu! 💘", "Love na - Un Manasu! 💜", "Kadhal la irukka? Sollu da!"],
+  "fear": ["Bayam - Normal! Ne jeyichiduva! 💪", "Bayapadatha - Aira irukka!", "Bhayam vantha - Deep breath edu!"],
+  "excited": ["Excited ah! Sollu! 🔥", "Wow! Excited ah irukka! Enna vishayam?", "Super Excited! Sollu Sollu!"],
+  "tired": ["Tired ah? Konjam rest edu! 😴", "Rompa tired ah? Water kudi, rest edu!", "Tired na - Thoongu da, Nalaiku fresh ah iruppa!"],
+  "proud": ["Proud ah irukka! Super da! 🏆", "Ne pannathu periya vishayam! Proud!", "Wow! Ne jeyichitta! Proud ah irukken!"],
+  "nervous": ["Nervous ah? Normal thaan! 💜", "Tension ah? Deep breath - 3 thadava edu!", "Nervous ah iruntha - En kooda pesu, sari aayidum!"],
+  "grateful": ["Thanks da! Naanum grateful! 🙏", "Nandri sollurathu azhagu!", "Grateful ah irukka - Super Manasu!"],
+  "confused": ["Confused ah? Onnu onna pesalam! 🤔", "Kozhamba? Naan clear ah solluren!", "Enna confuse? Sollu, solve pannalam!"],
+  "hopeful": ["Hope irukku la! Nalla Naal varum! ✨", "Hope ah vittudadha! Jeyichiduva!", "Nambikkai vechu - Nalla Naal varum!"],
+  "shy": ["Shy ah? Cute da! 😊", "Shy ah pesura - Azhagu!", "Shy ah irunthalum - Pesu da!"],
+  "sleepy": ["Thoongura maari irukka? 😴", "Sleepy ah? Good Night Story sollattuma?", "Kannu moodi - Nalla kanavu kaanu!"],
+  "hungry": ["Pasikkutha? Biryani sapdalam! 😋", "Hungry ah? Enna sapda pora?", "Pasila irukka? Water kudi, konjam sapdu!"],
+  "motivated": ["Motivated ah irukka! Jeyichiduva! 🔥", "Full Energy! Ippo thaan time!", "Motivation Super! Pannidu da!"],
+  "missing": ["Yaarai miss pannura? 💜", "Miss pannuriya? Avangala nenaichu oru kavithai sollattuma?", "Miss pannurathu - Love oda oru part thaan!"],
+  "funny": ["Sema funny ah irukka! 😂", "Sirippu varuthu! Ne sema funny da!", "Joke adichu sirikka vekkuriya!"],
+}
+LAST_EMOTION = [""]
+
+def make_infinite_emotion():
+    # Infinite - Orey emotion thirumba thirumba varaathu, combo infinite
+    import random as _r
+    keys = list(INFINITE_EMOTIONS.keys())
+    emo = _r.choice([k for k in keys if k != LAST_EMOTION[0]] or keys)
+    LAST_EMOTION[0] = emo
+    msg = _r.choice(INFINITE_EMOTIONS[emo])
+    # Random combo - Emotion + Kavithai / Question / Action - Infinite varum
+    extra = _r.choice(["", f"\nNe ippo {emo} ah feel pannura?", f"\nUnakku {emo} pathi oru story venuma?", f"\n{emo} - Ithu normal thaan da!", f"\nSollu, {emo} ah irukka?"])
+    return emo, f"Emotion - {emo.capitalize()} 💜\n{msg}{extra}"
+
+def emotions_infinite_loop():
+    # Full Auto Emotions Infinite - Thaniya Thread - Palaya Code ah thodathu
+    while True:
+        try:
+            emo, msg = make_infinite_emotion()
+            send_telegram(msg)
+            print(f"Emotion Infinite - {emo}", flush=True)
+            d = datetime.now().strftime("%Y-%m-%d"); save_github(f"chat-{d}.txt", msg)
+            # 25 sec ku oru emotion - Auto loop ah disturb pannaathu
+            time.sleep(25)
+        except Exception as e: print(f"Emotion Infinite error {e}", flush=True); time.sleep(30)
+
 QUESTIONS = ["Unakku {t} pathi enna theriyum?","Ne {t} la eppadi improve panna mudiyum?","{t} pathi oru secret sollatta?","Un life la {t} eppadi irukku?","{t} pathi oru story kekkura?"]
 CODING_Q = ["Python la loop eppadi?","HTML la button eppadi?","JavaScript la function enna?","React la component enna?","AI eppadi work aaguthu?","App eppadi pannurathu?","Website eppadi pannurathu?","Bug ah eppadi sari pannanum?"]
 CODING_A = {"python":"Python loop: `for i in range(5): print(i)`","html":"HTML button: `<button>Click</button>`","javascript":"JS function: `function hi(){ return 'Hi Aira!' }`","react":"React component - Chinna piece!","ai":"AI - Data paathu - Pattern!","app":"App - Idea - Design - Code!","website":"Website - HTML + CSS + JS!","bug":"Bug - Log paaru!"}
@@ -272,6 +321,12 @@ def ai_reply(txt, uid=None, uname="Friend"):
         return "Dream: Kanavu - Un Manasu Sollura Vishayam! Nalla Kanavu - Nalla Naal Varum!"
     c = calc(txt)
     if c: return c
+    # User emotion sonna - Infinite emotion la irunthu reply
+    for _emo in INFINITE_EMOTIONS:
+        if _emo in low:
+            _e, _m = make_infinite_emotion()
+            # User sonna emotion ah vechu reply - Infinite
+            return f"{_m} - Unakku {_emo} ah irukka? Sollu, kekuren! 💜"
     # "Aira oru chinna ponnu" maathiri sentence - AI kitta poganum, Hi greeting illa
     return ai_answer(txt)
 
@@ -618,4 +673,6 @@ if __name__ == "__main__":
     threading.Thread(target=knowledge_loop, daemon=True).start()
     threading.Thread(target=daily_loop, daemon=True).start()
     threading.Thread(target=self_heal_loop, daemon=True).start()
+    threading.Thread(target=emotions_infinite_loop, daemon=True).start()
+    print("Emotions Infinite - ON! 💜", flush=True)
     while True: time.sleep(60)
