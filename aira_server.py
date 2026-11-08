@@ -211,6 +211,110 @@ def calc(text):
 
 def ai_reply(txt, uid=None, uname="Friend"):
     low = txt.lower().strip()
+    # FIX: "chinna" la "hi" irukku nu thappa nenaikatha - word ah paakanum
+    words = re.findall(r"[a-z\u0b80-\u0bff]+", low)
+    wset = set(words)
+    clean_low = low.replace("aira","").strip()
+    if clean_low in ["me krishna","me krish","naan krishna","naan krish","krishna","krish"]:
+        return f"Hi {uname}! 💜 Ne Thaan En Friend! Aprom enna? Story venuma? Game venuma?"
+    # Hi mattum - thaniya word ah iruntha mattum
+    if low in ["hi","hello","hi aira","hello aira","aira hi","aira hello","hi!","hello!"] or wset & {"vanakkam"} and len(words) <= 3:
+        if uid:
+            mem = get_memory_greeting(uid)
+            if mem: return mem
+        return "Hi! Naan Aira! Enna pannura? Knowledge venuma? Book venuma? Story venuma? Game venuma? Health venuma? 💜"
+    if "namaste" in low: return "Namaste! Main Aira hoon!"
+    if "hola" in low: return "Hola! Soy Aira!"
+    if "bonjour" in low: return "Bonjour! Je suis Aira!"
+    # FULL RANDOM: Kelvi na FIRST AI
+    is_question = ("?" in txt or "enna" in low or "eppadi" in low or "yen" in low or "why" in low or "what" in low or "how" in low or "pathi" in low or "sollu" in low or "yaaru" in low or "ethu" in low or "evlo" in low or "eppo" in low or "enga" in low or "where" in low or "when" in low or "who" in low or "which" in low)
+    if "magic" in low and "book" in low:
+        return ai_answer(txt)
+    if is_question:
+        if low.replace("aira","").strip() in ["book","story","joke","kavithai","thirukkural","pazhamozhi","game","health","movie","song"]:
+            pass
+        else:
+            return ai_answer(txt)
+    # Chinna Command mattum - Random OK
+    if low.replace("aira","").strip() in ["joke","joke sollu"]: return random.choice(JOKES)
+    if low.replace("aira","").strip() in ["book","reading","book sollu"]: return "Reading: " + random.choice(READINGS)
+    if low.replace("aira","").strip() in ["story","kathai","story sollu"]: return "Story: " + make_story(uname)
+    if "kavithai" in low and len(low) < 25: return "Kavithai: " + random.choice(KAVITHAI_T)
+    if "thirukkural" in low and len(low) < 30: return "Thirukkural: " + random.choice(THIRUKKURAL)
+    if "pazhamozhi" in low and len(low) < 30: return "Pazhamozhi: " + random.choice(PAZHAMOZHI)
+    if "game" in low and len(low) < 20: return "Game: " + random.choice(GAMES)
+    if "health" in low and len(low) < 20: return random.choice(HEALTH_TIPS)
+    if "vocab" in low or "word" in low:
+        w, m = random.choice(VOCAB); return f"Vocab: {w} = {m}"
+    if "recipe" in low or "samayal" in low or "biryani" in low or "cake" in low:
+        if is_question: return ai_answer(txt)
+        return "Recipe: " + random.choice(RECIPES)
+    if "business" in low or "idea" in low:
+        if is_question: return ai_answer(txt)
+        return "Business Idea: " + random.choice(BUSINESS_IDEAS)
+    if "movie" in low and len(low) < 20: return "Movie: " + random.choice(MOVIES)
+    if "song" in low and len(low) < 20: return "Song: " + random.choice(SONGS)
+    if "love letter" in low: return f"Love Letter\nAnbe {uname}, Un Sirippu - En Vazhkai! - Aira"
+    if "caption" in low: return f"Caption: {uname} - Smile - Life Azhagu! - Aira"
+    if "compliment" in low: return f"{uname}! Ne Azhagu! Ne Smart! Ne Nalla Manasu! 💜"
+    if "todo" in low or "list" in low:
+        if uid in USER_MEMORY: return f"To-Do List\n{USER_MEMORY[uid]['todo'] if USER_MEMORY[uid]['todo'] else 'List Empty!'}"
+        return "To-Do: `Add - Milk vangnum` nu Sollu!"
+    if low.startswith("add -") or low.startswith("add "):
+        if uid: USER_MEMORY[uid]["todo"].append(txt); return f"To-Do Added - {txt}"
+        return "To-Do Added!"
+    if "note" in low:
+        if uid: USER_MEMORY[uid]["notes"].append(txt); return f"Note Saved - {txt}"
+    if "birthday" in low: return "Birthday: Date Sollu - Aira Nyabagam Vachikum!"
+    if "secret" in low or "diary" in low: return "Secret / Diary Saved - Yaarukkum Kaata Maaten!"
+    if "dream" in low or "kanavu" in low:
+        if is_question: return ai_answer(txt)
+        return "Dream: Kanavu - Un Manasu Sollura Vishayam! Nalla Kanavu - Nalla Naal Varum!"
+    c = calc(txt)
+    if c: return c
+    # "Aira oru chinna ponnu" maathiri sentence - AI kitta poganum, Hi greeting illa
+    return ai_answer(txt)
+
+def calc(text):
+    try:
+        m = re.search(r'(\d+)\s*([\+\-\*/])\s*(\d+)', text)
+        if m:
+            a, op, b = int(m.group(1)), m.group(2), int(m.group(3))
+            if op == "+": return f"Calculator: {a} + {b} = {a+b}"
+            if op == "-": return f"Calculator: {a} - {b} = {a-b}"
+            if op == "*": return f"Calculator: {a} * {b} = {a*b}"
+            if op == "/": return f"Calculator: {a} / {b} = {a/b:.2f}"
+    except: pass
+    return None
+
+def ai_reply(txt):
+    low = txt.lower()
+    # FIX: "hi" nu paatha pothathu - "chinna" la kooda "hi" irukku! Adhan thappu reply vanthuchu
+    # Word ah paakanum - "hi" thaniya iruntha mattum Hi
+    words = re.findall(r"[a-z\u0b80-\u0bff]+", low)
+    wset = set(words)
+    if wset & {"namaste"}: return "Namaste! Main Aira hoon! Kaise ho? Kya chahiye? ❤️"
+    if wset & {"hola"}: return "Hola! Soy Aira! Como estas? ❤️"
+    if wset & {"bonjour"}: return "Bonjour! Je suis Aira! ❤️"
+    if wset & {"hi","hello","hey","vanakkam","hai"}: return "Hi 💘! Naan Aira! Enna pannura? Sollu - Kadhal ah? Career ah? Joke venuma? Story venuma? 😊💜"
+    if "joke" in low: return random.choice(JOKES)
+    if "book" in low: return "Book - Channel la varum! 📚"
+    return None
+
+def calc(text):
+    try:
+        m = re.search(r'(\d+)\s*([\+\-\*/])\s*(\d+)', text)
+        if m:
+            a, op, b = int(m.group(1)), m.group(2), int(m.group(3))
+            if op == "+": return f"Calculator: {a} + {b} = {a+b}"
+            if op == "-": return f"Calculator: {a} - {b} = {a-b}"
+            if op == "*": return f"Calculator: {a} * {b} = {a*b}"
+            if op == "/": return f"Calculator: {a} / {b} = {a/b:.2f}"
+    except: pass
+    return None
+
+def ai_reply(txt, uid=None, uname="Friend"):
+    low = txt.lower().strip()
     clean_low = low.replace("aira","").strip()
     if clean_low in ["me krishna","me krish","naan krishna","naan krish","krishna","krish"]:
         return f"Hi {uname}! 💜 Ne Thaan En Friend! Aprom enna? Story venuma? Game venuma?"
