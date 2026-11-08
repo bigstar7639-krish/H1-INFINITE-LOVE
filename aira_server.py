@@ -1,4 +1,5 @@
-# AIRAH1 - FINAL - Main Bot - Full Random AI First + 10sec Kept + Quiz Fix + Festival + do_HEAD
+# AIRAH1 - FINAL 0.2 SEC - Main Bot - Full Random AI First + DATA MODE 0.2s + Emotions Infinite + Books Infinite
+# File: aira_server.py - Start: python3 -u aira_server.py
 # File: aira_server.py - Start: python3 -u aira_server.py
 import os, random, time, threading, requests, base64, re, html
 from datetime import datetime
@@ -214,18 +215,25 @@ def answer_from_book(question, book_key):
     return f"📚 Book la irunthu: {best[:800]}"
 
 def book_infinite_loop():
-    # Full Auto Book Reading Infinite - 60 sec ku oru Page - Thaniya Thread
+    # DATA MODE - 0.2 sec ku 1 Page - Padikka Illa - Aira Train panna DATA Edukka
+    # Telegram ku Anuppa Maatom - GitHub la Mattum Save - Illana Telegram Block Pannidum (429)
     import random as _r
     free_books = [k for k,v in BOOKS_FULL.items() if v["free"]]
     idx = 0
+    page_count = [0]
     while True:
         try:
             key = free_books[idx % len(free_books)]; idx += 1
             msg = read_book_infinite(key, chars=700)
-            send_telegram(msg)
-            print(f"Book Infinite - {key}", flush=True)
-            time.sleep(60)
-        except Exception as e: print(f"Book Infinite error {e}", flush=True); time.sleep(60)
+            page_count[0] += 1
+            # DATA Save - GitHub la Save - Telegram ku Anuppa Koodathu
+            save_github(f"book-data-{key}-{page_count[0]}.txt", msg)
+            print(f"Book DATA - {key} - Page {page_count[0]} - Saved for Training", flush=True)
+            # 100 Pages ku oru thadava mattum Telegram la Progress
+            if page_count[0] % 100 == 0:
+                send_telegram(f"📚 Aira Training - {key} - {page_count[0]} Pages Data Ready! Train Panniten!", BOOKS_ID)
+            time.sleep(0.2)  # ULTRA FAST - 0.2 sec ku 1 Page = 5 Pages per sec - DATA MODE
+        except Exception as e: print(f"Book Infinite error {e}", flush=True); time.sleep(1)
 
 # Book Commands in ai_reply - Add before return
 
