@@ -127,6 +127,37 @@ def make_infinite_emotion():
     extra = _r.choice(["", f"\nNe ippo {emo} ah feel pannura?", f"\nUnakku {emo} pathi oru story venuma?", f"\n{emo} - Ithu normal thaan da!", f"\nSollu, {emo} ah irukka?"])
     return emo, f"Emotion - {emo.capitalize()} 💜\n{msg}{extra}"
 
+# ===== ELLAME FULL PARAGRAPH KATHA - Single Single Illa - Full Paragraph Story =====
+KATHA_TEMPLATES = [
+    "{seed} Oru naal oru chinna oor la oru paiyan irunthan, avan manasula {topic} pathi neraya yosichittu irunthan, yaar kitta sollurathu nu theriyama thaniya irunthan, appo avanukku oru nalla friend kedaichan, antha friend avan kooda pesi avan manasa purinjikittan, kadasiya avan {topic} la irunthu nalla purithaloda sirichuttu veetuku ponan, ithu thaan {topic} oda azhagu, kashtam vanthalum nambikkaiya iruntha ellam sari aayidum nu avan purinjikittan.",
+    "{seed} {topic} pathi kelvi patta oru ponnu, ava daily {topic} pathi yosichittu iruntha, oru naal ava oru puthu book padichu {topic} oda unmaiya purinjikita, athula irunthu ava life maariduchu, ava bayapadama {topic} ah face panna aarambicha, ava friends ellam ava maariya paathu aachariyapattanga, kadasiya ava {topic} la jeyichu santhosham ah iruntha, ithu thaan namakku kathai sollura paadam, vittu kudutha illana jeyichidalam.",
+    "{seed} Oru kaalathula oru oor la {topic} nu oru periya vishayam irunthuchu, yaarum atha purinjikama irunthanga, oru chinna paiyan thaan {topic} oda arumaiya purinjikittan, avan {topic} pathi ellaar kitta yum pesi puriya vachan, mella mella oor makkal ellam {topic} ah purinjikittanga, antha oor ye {topic} nala azhaga maariduchu, ithula irunthu namakku theriyura vishayam enna na, {topic} ah purinjikita life ye azhagahum.",
+]
+
+def make_full_paragraph_katha(seed, topic):
+    # Ellame Full Paragraph Katha - Single Single illa - Seed + Full Katha Paragraph
+    import random as _r
+    topic = (topic or "life").strip()
+    seed = (seed or "").strip()
+    # Seed chinna na - Full Paragraph aakkurom
+    tpl = _r.choice(KATHA_TEMPLATES)
+    para = tpl.format(seed=seed, topic=topic)
+    # Paragraph 400+ chars irukkanum - Illana extra line serkkurom
+    if len(para) < 400:
+        para = para + f" {topic} pathi innum sollanum na, {topic} la irukka azhagai paathu rasikkanum, kashtam vanthalum sirichuttu kadanthurathu thaan {topic} oda unmaiyana artham, nee {topic} ah purinjikita un life um azhagahum."
+    return para
+
+def to_full_paragraph(msg, topic="life"):
+    # Oru message ah Full Paragraph Katha va maathurom - Already Paragraph na apdiye
+    if not msg:
+        return make_full_paragraph_katha("Oru katha.", topic)
+    # Already 400+ chars + 3 lines iruntha - Already Paragraph - Apdiye
+    if len(msg) >= 400 and msg.count(chr(10)) >= 2:
+        return msg
+    # Single Single na - Full Paragraph aakkurom
+    return msg + chr(10) + chr(10) + make_full_paragraph_katha("", topic)
+
+
 
 # ===== FULL BOOK DOWNLOAD + READ + Q&A INFINITE =====
 # Copyright Rule: Full Download - Public Domain Books mattum (Free). 
@@ -261,7 +292,8 @@ def emotions_infinite_loop():
     # Full Auto Emotions Infinite - Thaniya Thread - Palaya Code ah thodathu
     while True:
         try:
-            emo, msg = make_infinite_emotion()
+            emo, _short = make_infinite_emotion()
+            msg = f"Emotion Katha - {emo.capitalize()} \u2764\n\n" + make_full_paragraph_katha(_short, emo)
             send_telegram(msg)
             print(f"Emotion Infinite - {emo}", flush=True)
             d = datetime.now().strftime("%Y-%m-%d"); save_github(f"chat-{d}.txt", msg)
@@ -497,6 +529,8 @@ def infinite_loop():
             elif typ == "Reading": msg = f"Reading {count} - {random.choice(READINGS)}"; print(f"Reading {count}", flush=True)
             elif typ == "Smart Q": msg = f"Smart Q {count} - {t} la eppadi jeyikkarathu?"; print(f"Smart Q {count}", flush=True)
             else: msg = f"Motivation {count}\n{random.choice(MOTIVATIONS)}"; print(f"Motivation {count}", flush=True)
+            # ELLAME FULL PARAGRAPH KATHA - Single Single illa - Q+A kooda Full Paragraph thaan
+            msg = to_full_paragraph(msg, t)
             send_telegram(msg)
             d = datetime.now().strftime("%Y-%m-%d"); save_github(f"chat-{d}.txt", msg)
             if typ == "Knowledge": save_github(f"knowledge-{d}.txt", msg)
@@ -616,7 +650,7 @@ def listen_loop():
                 # FULL RANDOM FIX: Group la "aira" iruntha pothum - Ellam kelvi kekkum. Private la ellam kekkum.
                 if "aira" in low or m.get("chat",{}).get("type")=="private":
                     print(f"Listen Got: {txt} - User: {uname}", flush=True)
-                    rep=ai_reply(txt, uid, uname)
+                    rep=to_full_paragraph(ai_reply(txt, uid, uname), txt[:30])
                     if not rep: rep=ai_answer(txt)
                     send_telegram(rep, m["chat"]["id"]); print("Listen Replied", flush=True)
         except Exception as e: print("Listen error", e, flush=True); time.sleep(5)
