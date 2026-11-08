@@ -1,4 +1,4 @@
-# AIRAH1 - FINAL - Main Bot - 10sec Kept + Quiz Fix + Festival + do_HEAD + AI Bug Fix + Festival Fix + do_HEAD + AI Bug Fix
+# AIRAH1 - FINAL - Main Bot - Full Random AI First + 10sec Kept + Quiz Fix + Festival + do_HEAD
 # File: aira_server.py - Start: python3 -u aira_server.py
 import os, random, time, threading, requests, base64, re, html
 from datetime import datetime
@@ -136,24 +136,29 @@ def get_quote():
             j = r.json(); return f"{j.get('content','')} - {j.get('author','')}"
     except: pass
     return random.choice(QUOTES)
+
+# ===== FULL RANDOM FIX - AI FIRST =====
 def ai_answer(q):
-    low = q.lower()
-    clean = low.replace("aira"," ").replace("aira!"," ").replace("aira,"," ")
-    words = re.findall(r"[a-z]+", clean)
-    for k,v in CODING_A.items():
-        if k in words: return v
-        if len(k) > 3 and k in clean: return v
-    for k,v in EMOTIONS.items():
-        if k in words: return random.choice(v)
+    # 1. FIRST - GROQ - Full Random ku
     for key in GROQ_KEYS:
         if not key: continue
         try:
-            r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {key}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. User: {q}"}]}, timeout=15)
+            r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {key}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple. User: {q}"}]}, timeout=15)
             if r.status_code==200:
-                print("AI Answer - Groq1 - OK", flush=True)
-                return r.json()["choices"][0]["message"]["content"][:800]
-        except: pass
+                print("AI Answer - Groq - OK", flush=True)
+                return r.json()["choices"][0]["message"]["content"][:1200]
+            else:
+                print(f"AI Answer - Groq Fail {r.status_code}", flush=True)
+        except Exception as e: print(f"AI Groq Error {e}", flush=True); pass
+    # 2. Groq fail aana - Canned Backup mattum
+    low = q.lower()
+    words = re.findall(r"[a-z]+", low.replace("aira"," "))
+    for k,v in CODING_A.items():
+        if k in words: return v
+    for k,v in EMOTIONS.items():
+        if k in words: return random.choice(v)
     return f"{q} - Nalla question! Daily try pannu - Jeyichiduva! 💜"
+
 def calc(text):
     try:
         m = re.search(r'(\d+)\s*([\+\-\*/])\s*(\d+)', text)
@@ -165,37 +170,52 @@ def calc(text):
             if op == "/": return f"Calculator: {a} / {b} = {a/b:.2f}"
     except: pass
     return None
+
 def ai_reply(txt, uid=None, uname="Friend"):
-    low = txt.lower()
+    low = txt.lower().strip()
     clean_low = low.replace("aira","").strip()
     if clean_low in ["me krishna","me krish","naan krishna","naan krish","krishna","krish"]:
         return f"Hi {uname}! 💜 Ne Thaan En Friend! Aprom enna? Story venuma? Game venuma?"
-    if uid and ("hi" in low or "hello" in low):
-        mem = get_memory_greeting(uid)
-        if mem: return mem
+    # Hi mattum - Memory Greeting
+    if low in ["hi","hello","hi aira","hello aira","aira hi","aira hello","hi!","hello!"]:
+        if uid:
+            mem = get_memory_greeting(uid)
+            if mem: return mem
+        return "Hi! Naan Aira! Enna pannura? Knowledge venuma? Book venuma? Story venuma? Game venuma? Health venuma? 💜"
     if "namaste" in low: return "Namaste! Main Aira hoon!"
     if "hola" in low: return "Hola! Soy Aira!"
     if "bonjour" in low: return "Bonjour! Je suis Aira!"
-    if "hi" in low or "hello" in low: return "Hi! Naan Aira! Enna pannura? Knowledge venuma? Book venuma? Story venuma? Game venuma? Health venuma? 💜"
-    if "joke" in low: return random.choice(JOKES)
-    if "book" in low or "reading" in low: return "Reading: " + random.choice(READINGS)
-    if "story" in low or "kathai" in low: return "Story: " + make_story(uname)
-    if "kavithai" in low: return "Kavithai: " + random.choice(KAVITHAI_T)
-    if "thirukkural" in low or "kural" in low: return "Thirukkural: " + random.choice(THIRUKKURAL)
-    if "pazhamozhi" in low: return "Pazhamozhi: " + random.choice(PAZHAMOZHI)
-    if "game" in low or "riddle" in low or "quiz" in low or "rock" in low or "paper" in low or "scissors" in low or "toss" in low or "dice" in low:
-        if "rock" in low or "paper" in low or "scissors" in low:
-            aira = random.choice(["Rock","Paper","Scissors"]); return f"Game - Rock Paper Scissors\nNe: {txt}\nAira: {aira}!"
-        if "toss" in low: return f"Coin Toss - {random.choice(['Head','Tail'])}!"
-        if "dice" in low: return f"Dice - {random.randint(1,6)}!"
-        return "Game: " + random.choice(GAMES)
-    if "health" in low or "yoga" in low or "diet" in low: return random.choice(HEALTH_TIPS)
+    # === FULL RANDOM FIX: Kelvi na FIRST AI ===
+    # ? iruntha, enna/eppadi/yen/what/why/how/sollu/pathi iruntha -> Direct AI, Random illa
+    is_question = ("?" in txt or "enna" in low or "eppadi" in low or "yen" in low or "why" in low or "what" in low or "how" in low or "pathi" in low or "sollu" in low or "yaaru" in low or "ethu" in low or "evlo" in low or "eppo" in low or "enga" in low or "where" in low or "when" in low or "who" in low or "which" in low)
+    # Magic Book special - Full AI, Random illa
+    if "magic" in low and "book" in low:
+        return ai_answer(txt)
+    if is_question:
+        # Verum oru vaarthai mattum na thaan Random - Full kelvi na AI
+        if low.replace("aira","").strip() in ["book","story","joke","kavithai","thirukkural","pazhamozhi","game","health","movie","song"]:
+            pass
+        else:
+            return ai_answer(txt)
+    # === Chinna Command mattum - Random OK ===
+    if low.replace("aira","").strip() in ["joke","joke sollu"]: return random.choice(JOKES)
+    if low.replace("aira","").strip() in ["book","reading","book sollu"]: return "Reading: " + random.choice(READINGS)
+    if low.replace("aira","").strip() in ["story","kathai","story sollu"]: return "Story: " + make_story(uname)
+    if "kavithai" in low and len(low) < 25: return "Kavithai: " + random.choice(KAVITHAI_T)
+    if "thirukkural" in low and len(low) < 30: return "Thirukkural: " + random.choice(THIRUKKURAL)
+    if "pazhamozhi" in low and len(low) < 30: return "Pazhamozhi: " + random.choice(PAZHAMOZHI)
+    if "game" in low and len(low) < 20: return "Game: " + random.choice(GAMES)
+    if "health" in low and len(low) < 20: return random.choice(HEALTH_TIPS)
     if "vocab" in low or "word" in low:
         w, m = random.choice(VOCAB); return f"Vocab: {w} = {m}"
-    if "recipe" in low or "samayal" in low or "biryani" in low or "cake" in low: return "Recipe: " + random.choice(RECIPES)
-    if "business" in low or "idea" in low: return "Business Idea: " + random.choice(BUSINESS_IDEAS)
-    if "movie" in low: return "Movie: " + random.choice(MOVIES)
-    if "song" in low: return "Song: " + random.choice(SONGS)
+    if "recipe" in low or "samayal" in low or "biryani" in low or "cake" in low:
+        if is_question: return ai_answer(txt)
+        return "Recipe: " + random.choice(RECIPES)
+    if "business" in low or "idea" in low:
+        if is_question: return ai_answer(txt)
+        return "Business Idea: " + random.choice(BUSINESS_IDEAS)
+    if "movie" in low and len(low) < 20: return "Movie: " + random.choice(MOVIES)
+    if "song" in low and len(low) < 20: return "Song: " + random.choice(SONGS)
     if "love letter" in low: return f"Love Letter\nAnbe {uname}, Un Sirippu - En Vazhkai! - Aira"
     if "caption" in low: return f"Caption: {uname} - Smile - Life Azhagu! - Aira"
     if "compliment" in low: return f"{uname}! Ne Azhagu! Ne Smart! Ne Nalla Manasu! 💜"
@@ -209,19 +229,14 @@ def ai_reply(txt, uid=None, uname="Friend"):
         if uid: USER_MEMORY[uid]["notes"].append(txt); return f"Note Saved - {txt}"
     if "birthday" in low: return "Birthday: Date Sollu - Aira Nyabagam Vachikum!"
     if "secret" in low or "diary" in low: return "Secret / Diary Saved - Yaarukkum Kaata Maaten!"
-    if "dream" in low or "kanavu" in low: return "Dream: Kanavu - Un Manasu Sollura Vishayam! Nalla Kanavu - Nalla Naal Varum!"
-    if "code" in low or "python" in low: return ai_answer(txt)
-    if "enna" in low or "what" in low or "eppadi" in low or "how" in low or "yen" in low or "why" in low or "pathi" in low:
-        for t in KNOWLEDGE_TOPICS:
-            if t.lower() in low:
-                wk = get_wiki(t)
-                if wk: return wk
-        return ai_answer(txt)
+    if "dream" in low or "kanavu" in low:
+        if is_question: return ai_answer(txt)
+        return "Dream: Kanavu - Un Manasu Sollura Vishayam! Nalla Kanavu - Nalla Naal Varum!"
     c = calc(txt)
     if c: return c
-    for emo, replies in EMOTIONS.items():
-        if emo in low: return random.choice(replies)
-    return None
+    # Meethi ellam AI kitta - Full Random
+    return ai_answer(txt)
+
 def infinite_loop():
     global count, fact_count, know_idx, game_idx, health_idx
     while True:
@@ -375,7 +390,8 @@ def listen_loop():
                 uid = str(m.get("from",{}).get("id","")); uname = m.get("from",{}).get("first_name","Friend")
                 remember_user(uid, uname, txt)
                 low=txt.lower()
-                if any(k in low for k in ["aira","hi","hello","joke","code","sad","love","book","story","game","health","enna","what","eppadi","how","yen","why","kavithai","thirukkural","recipe","movie","song","business","todo","note","birthday","secret","diary","dream","compliment","caption","vocab"]) or m.get("chat",{}).get("type")=="private":
+                # FULL RANDOM FIX: Group la "aira" iruntha pothum - Ellam kelvi kekkum. Private la ellam kekkum.
+                if "aira" in low or m.get("chat",{}).get("type")=="private":
                     print(f"Listen Got: {txt} - User: {uname}", flush=True)
                     rep=ai_reply(txt, uid, uname)
                     if not rep: rep=ai_answer(txt)
@@ -410,8 +426,6 @@ def self_heal_loop():
             print(f"Self-Heal Check - Count {count} - Repo {CURRENT_REPO[0]} - Users {len(USER_MEMORY)} - OK", flush=True)
             save_github(f"heartbeat-{datetime.now().strftime('%Y-%m-%d')}.txt", f"Alive - {datetime.now()} - Count {count} - Repo {CURRENT_REPO[0]}")
         except Exception as e: print(f"Self-Heal error {e}", flush=True); time.sleep(30)
-
-# --- SINGLE INSTANCE GUARD - Main Double Stop! - Worker Mathiri ---
 def check_other_instance_main():
     try:
         from datetime import datetime as _dt
@@ -441,10 +455,8 @@ def wait_for_single_instance_main():
         time.sleep(90)
     print("Single-Instance GUARD Main: Vera Bot Oduthu - Naan Exit!", flush=True)
     import sys; sys.exit(0)
-
 if __name__ == "__main__":
     print("AIRAH1 FINAL V4 MAIN - Started", flush=True)
-    # V4: Port First!
     def start_http():
         try:
             from http.server import HTTPServer, BaseHTTPRequestHandler
