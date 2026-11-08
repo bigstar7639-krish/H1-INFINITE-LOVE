@@ -127,6 +127,108 @@ def make_infinite_emotion():
     extra = _r.choice(["", f"\nNe ippo {emo} ah feel pannura?", f"\nUnakku {emo} pathi oru story venuma?", f"\n{emo} - Ithu normal thaan da!", f"\nSollu, {emo} ah irukka?"])
     return emo, f"Emotion - {emo.capitalize()} 💜\n{msg}{extra}"
 
+
+# ===== FULL BOOK DOWNLOAD + READ + Q&A INFINITE =====
+# Copyright Rule: Full Download - Public Domain Books mattum (Free). 
+# Copyright Books - Full PDF illa, Summary + Link mattum. Ithu thaan Legal.
+BOOKS_FULL = {
+  # Free - Full Download OK - Project Gutenberg / Public Domain
+  "pride and prejudice": {"title":"Pride and Prejudice - Jane Austen","url":"https://www.gutenberg.org/files/1342/1342-8.txt","free":True,"lang":"English"},
+  "bharathiyar": {"title":"Bharathiyar Kavithaigal - Mahakavi Bharathiyar","url":"https://www.gutenberg.org/files/37926/37926-8.txt","free":True,"lang":"Tamil"},
+  "thirukkural": {"title":"Thirukkural - Thiruvalluvar","url":"https://raw.githubusercontent.com/bigstar7639-krish/H1-INFINITE-LOVE/main/data/thirukkural.txt","free":True,"lang":"Tamil"},
+  "alchemist": {"title":"The Alchemist - Paulo Coelho","url":"","free":False,"lang":"English"},
+  "harry potter": {"title":"Harry Potter - J.K. Rowling","url":"","free":False,"lang":"English"},
+  "48 laws": {"title":"48 Laws of Power - Robert Greene","url":"","free":False,"lang":"English"},
+  "python": {"title":"Python Crash Course - Eric Matthes","url":"","free":False,"lang":"English"},
+  "atomic habits": {"title":"Atomic Habits - James Clear","url":"","free":False,"lang":"English"},
+}
+BOOKS_CACHE = {}  # book_key -> full text
+BOOKS_POS = {}  # book_key -> current read position (infinite reading)
+
+def download_book(key):
+    key = key.lower()
+    # Find book
+    for k,v in BOOKS_FULL.items():
+        if k in key or key in k:
+            if not v["free"]:
+                return None, f"📚 {v['title']}\nFull Book Download illa da - Copyright Book.\nNaan Full Summary + Important Points solluren.\nBuy pannina: Amazon / Book Store la kedaikkum.\nKekka venumna: 'Aira, {k} pathi full ah sollu' nu kelu!"
+            if k in BOOKS_CACHE: return BOOKS_CACHE[k], "cached"
+            if not v["url"]:
+                return None, "Link illa da - Vera book try pannu!"
+            try:
+                import requests as _rq
+                r = _rq.get(v["url"], timeout=30)
+                txt = r.text
+                # Clean Gutenberg header/footer
+                if len(txt) > 5000:
+                    BOOKS_CACHE[k] = txt
+                    BOOKS_POS[k] = 0
+                    print(f"Book Downloaded - {k} - {len(txt)} chars", flush=True)
+                    return txt, f"Download OK - {len(txt)} chars"
+                return None, "Download fail - Size chinna irukku"
+            except Exception as e:
+                print(f"Book Download Fail {k} {e}", flush=True)
+                return None, f"Download Fail - Net problem: {e}"
+    return None, "Book illa da - 'Aira, book list sollu' nu kelu!"
+
+def read_book_infinite(key, chars=800):
+    # Infinite Reading - Oru thadava 800 chars, Adutha thadava adutha 800 - Mudinja thirumba start
+    txt, status = download_book(key)
+    if not txt: return status
+    # Find key
+    real_key = [k for k in BOOKS_FULL if k in key or key in k][0]
+    pos = BOOKS_POS.get(real_key, 0)
+    if pos >= len(txt): pos = 0  # Infinite - Mudinja thirumba first la irunthu
+    chunk = txt[pos:pos+chars]
+    BOOKS_POS[real_key] = pos + chars
+    # Clean - Paragraph break la niruthu
+    chunk = chunk.replace("\r","").strip()
+    return f"📖 {BOOKS_FULL[real_key]['title']} - Page {pos//chars+1} - Infinite Reading 💜\n\n{chunk}\n\nAdutha Page venumna: 'Aira, {real_key} continue pannu' nu sollu!"
+
+def answer_from_book(question, book_key):
+    # Book la irunthu Question Answer - RAG style - Book chunk ah AI kitta kuduthu answer
+    txt, status = download_book(book_key)
+    if not txt: return status
+    # Simple search - Question words book la thedu
+    import re as _re
+    qwords = [w for w in _re.findall(r"[a-z]+", question.lower()) if len(w)>3]
+    best = ""
+    best_score = 0
+    # Chunk by 2000 chars, score pannu
+    for i in range(0, min(len(txt), 200000), 2000):
+        chunk = txt[i:i+2000].lower()
+        score = sum(1 for w in qwords if w in chunk)
+        if score > best_score:
+            best_score = score; best = txt[i:i+2000]
+    if best_score == 0: best = txt[0:2000]
+    # AI kitta book chunk + question kuduthu answer vaangu
+    prompt = f"You are Aira. Book: {BOOKS_FULL[book_key]['title']}. Book Content: {best[:3000]}. Question: {question}. Answer in Tanglish, 5 lines, from book only. Book la illa na - 'Book la illa da' nu sollu."
+    # Use existing Groq/Gemini via ai_answer logic - call Groq directly
+    for k in GROQ_KEYS if 'GROQ_KEYS' in globals() else [os.getenv("GROQ_API_KEY",""), os.getenv("GROQ_API_KEY_2",""), os.getenv("GROQ_API_KEY_3","")]:
+        if not k: continue
+        try:
+            r = requests.post("https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": f"Bearer {k}"}, json={"model":"openai/gpt-oss-120b","messages":[{"role":"user","content":prompt}]}, timeout=20)
+            if r.status_code==200:
+                return f"📚 Book Answer - {BOOKS_FULL[book_key]['title']} 💜\n\n" + r.json()["choices"][0]["message"]["content"][:1200]
+        except: pass
+    return f"📚 Book la irunthu: {best[:800]}"
+
+def book_infinite_loop():
+    # Full Auto Book Reading Infinite - 60 sec ku oru Page - Thaniya Thread
+    import random as _r
+    free_books = [k for k,v in BOOKS_FULL.items() if v["free"]]
+    idx = 0
+    while True:
+        try:
+            key = free_books[idx % len(free_books)]; idx += 1
+            msg = read_book_infinite(key, chars=700)
+            send_telegram(msg)
+            print(f"Book Infinite - {key}", flush=True)
+            time.sleep(60)
+        except Exception as e: print(f"Book Infinite error {e}", flush=True); time.sleep(60)
+
+# Book Commands in ai_reply - Add before return
+
 def emotions_infinite_loop():
     # Full Auto Emotions Infinite - Thaniya Thread - Palaya Code ah thodathu
     while True:
@@ -321,6 +423,26 @@ def ai_reply(txt, uid=None, uname="Friend"):
         return "Dream: Kanavu - Un Manasu Sollura Vishayam! Nalla Kanavu - Nalla Naal Varum!"
     c = calc(txt)
     if c: return c
+
+    # ===== FULL BOOK COMMANDS =====
+    if "book list" in low or "books list" in low or "book ella" in low:
+        lst = "\n".join([f"- {v['title']} - {'FREE Full Download ✅' if v['free'] else 'Summary Only - Copyright'} " for v in BOOKS_FULL.values()])
+        return f"📚 Aira Book Library - Infinite 💜\n\n{lst}\n\nFull Read venumna: 'Aira, Pride and Prejudice padikattum' nu sollu!"
+    if "download" in low and "book" in low:
+        for k in BOOKS_FULL:
+            if k in low:
+                txt, st = download_book(k)
+                if not txt: return st
+                return f"📚 Download Done! 💜\n{BOOKS_FULL[k]['title']}\nSize: {len(txt)} chars\nIppo padikattuma? 'Aira, {k} padikattum' nu sollu!"
+        return "Yentha book download pannanum? 'Aira, Pride and Prejudice download pannu' nu sollu!"
+    if ("padikattum" in low or "read" in low or "continue" in low or "padu" in low) and any(k in low for k in BOOKS_FULL):
+        for k in BOOKS_FULL:
+            if k in low: return read_book_infinite(k)
+    if "book" in low and ("?" in txt or "enna" in low or "yen" in low or "eppadi" in low or "who" in low or "what" in low or "why" in low):
+        # Book Q&A - Book la irunthu answer
+        for k in BOOKS_FULL:
+            if k in low: return answer_from_book(txt, k)
+        return "Yentha book pathi kekkura? 'Aira, Harry Potter la magic enna?' nu sollu!"
     # User emotion sonna - Infinite emotion la irunthu reply
     for _emo in INFINITE_EMOTIONS:
         if _emo in low:
@@ -675,4 +797,6 @@ if __name__ == "__main__":
     threading.Thread(target=self_heal_loop, daemon=True).start()
     threading.Thread(target=emotions_infinite_loop, daemon=True).start()
     print("Emotions Infinite - ON! 💜", flush=True)
+    threading.Thread(target=book_infinite_loop, daemon=True).start()
+    print("Books Infinite - ON! 📚", flush=True)
     while True: time.sleep(60)
