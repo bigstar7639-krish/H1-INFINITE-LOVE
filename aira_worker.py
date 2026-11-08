@@ -1,4 +1,4 @@
-# AIRAH1 - FINAL V4 - Worker - Port First + Single Guard - 100/100 + No Watermark + Japan + China + India + Infinite Source + Infinite Repo + do_HEAD
+# AIRAH1 - FINAL V7 WORKER - PARAGRAPH KATHA + FAST - Batch Save + Cache + Sleep 0.5 - Worker Only Fast - Ellame Full Paragraph Katha - Single Single Illa - Worker - Port First + Single Guard - 100/100 + No Watermark + Japan + China + India + Infinite Source + Infinite Repo + do_HEAD
 # File: aira_worker.py - Start: python3 -u aira_worker.py
 # NO Pollinations! NO Google / Instagram / Facebook scraping! Only FREE legal sources - No Watermark!
 import os, time, threading, requests, base64, random, html, re
@@ -21,6 +21,22 @@ print(f"Worker Start - Bot1 OK? {bool(BOT1_TOKEN)} Bot2 OK? {bool(BOT2_TOKEN)} C
 
 CURRENT_REPO = ["H1-Data-3"]; REPO_COUNT = [0]; MAX_PER_REPO = 1000
 SAVE_LOCK = threading.Lock()
+# ===== WORKER FAST - BATCH SAVE - 10x Fast =====
+SAVE_BUFFER = []
+SAVE_BUFFER_LOCK = threading.Lock()
+BATCH_SIZE = 20
+def flush_buffer():
+    global SAVE_BUFFER
+    with SAVE_BUFFER_LOCK:
+        if not SAVE_BUFFER: return
+        batch = SAVE_BUFFER[:]; SAVE_BUFFER = []
+    grouped = {}
+    for fn, content in batch:
+        grouped.setdefault(fn, []).append(content)
+    for fn, parts in grouped.items():
+        save_github(fn, chr(10).join(parts))
+    print(f'Worker Batch Flush - {len(batch)} items -> {len(grouped)} files - 1 Save each!', flush=True)
+
 def get_repo_num(r):
     try: return int(r.split("-")[-1])
     except: return 3
@@ -68,7 +84,6 @@ def save_github(filename, content):
         return False
 
 # --- 100+ CATEGORIES - Tamil + Japan + China + India + Global ---
-START_N = 1
 BASE_CATS = ["Tamil","Love","God","Nature","Cat","Dog","Food","Cricket","Space","Story","Health","Music","Movie","Temple","Flower","Sea","Mountain","River","Sky","Star","Moon","Sun","Bird","Animal","Baby","Teacher","Student","Business","Money","Yoga","Meditation","Fitness","Diet","Sleep","Beauty","Fashion","Game","Sport","Football","Science","History","Culture","Festival","Marriage","Family","Friendship","Study","Dream","Success","Motivation","Peace","Courage","Kindness","Truth","Wisdom","Power","Magic","Luck","Destiny","Karma","Rain","Village","City","Chennai","Madurai","Delhi","Mumbai","London","Paris","Tokyo","New York","Egypt","Pyramids","Taj Mahal","Eiffel Tower","Psychology","Philosophy","Economics","Politics","Law","Education","Happiness","Smile","Heart","Future","Freedom","Hope","Faith",
 # Japan
 "Japan","Tokyo","Sakura","Kimono","Anime","Japanese Food","Sushi","Kyoto","Osaka","Japanese Temple","Japanese Girl","Samurai","Ninja",
@@ -288,7 +303,33 @@ def send_to_channel(text, bot_token, bot_name="Worker"):
 # 1. Openverse - 800M free photos - No watermark - Best for Japan/China/India!
 # 2. Wikimedia - 100M free photos - No watermark
 # 3. Unsplash Source - Free - No watermark
+
+# ===== WORKER PARAGRAPH MODE - Ellame Full Paragraph Katha - Single Single Illa =====
+WORKER_KATHA_TEMPLATES = [
+    "{seed} Oru naal oru chinna oor la oru paiyan irunthan, avan manasula {topic} pathi neraya yosichittu irunthan, yaar kitta sollurathu nu theriyama thaniya irunthan, appo avanukku oru nalla friend kedaichan, antha friend avan kooda pesi avan manasa purinjikittan, kadasiya avan {topic} la irunthu nalla purithaloda sirichuttu veetuku ponan, ithu thaan {topic} oda azhagu, kashtam vanthalum nambikkaiya iruntha ellam sari aayidum nu avan purinjikittan.",
+    "{seed} {topic} pathi kelvi patta oru ponnu, ava daily {topic} pathi yosichittu iruntha, oru naal ava oru puthu book padichu {topic} oda unmaiya purinjikita, athula irunthu ava life maariduchu, ava bayapadama {topic} ah face panna aarambicha, ava friends ellam ava maariya paathu aachariyapattanga, kadasiya ava {topic} la jeyichu santhosham ah iruntha, ithu thaan namakku kathai sollura paadam.",
+    "{seed} Oru kaalathula oru oor la {topic} nu oru periya vishayam irunthuchu, yaarum atha purinjikama irunthanga, oru chinna paiyan thaan {topic} oda arumaiya purinjikittan, avan {topic} pathi ellaar kitta yum pesi puriya vachan, mella mella oor makkal ellam {topic} ah purinjikittanga, antha oor ye {topic} nala azhaga maariduchu, ithula irunthu namakku theriyura vishayam enna na, {topic} ah purinjikita life ye azhagahum.",
+]
+def worker_full_paragraph(seed, topic):
+    import random as _r
+    topic = (topic or "life").strip()
+    seed = (seed or "").strip()
+    tpl = _r.choice(WORKER_KATHA_TEMPLATES)
+    para = tpl.format(seed=seed, topic=topic)
+    if len(para) < 400:
+        para = para + f" {topic} pathi innum sollanum na, {topic} la irukka azhagai paathu rasikkanum, kashtam vanthalum sirichuttu kadanthurathu thaan {topic} oda unmaiyana artham."
+    return para
+def worker_to_paragraph(msg, topic="life"):
+    if not msg:
+        return worker_full_paragraph("Oru katha.", topic)
+    if len(msg) >= 400 and msg.count(chr(10)) >= 2:
+        return msg
+    return msg + chr(10) + chr(10) + worker_full_paragraph("", topic)
+
+_WORKER_CACHE = {}
 def fetch_openverse(query, page=1):
+    _ck = f"ov:{query}:{page}"
+    if _ck in _WORKER_CACHE: return _WORKER_CACHE[_ck]
     try:
         r = requests.get("https://api.openverse.org/v1/images/", params={"q": query, "page": page, "page_size": 20}, headers={"User-Agent": "AIRAH1-Bot/1.0"}, timeout=20)
         if r.status_code == 200:
@@ -296,6 +337,7 @@ def fetch_openverse(query, page=1):
             for it in r.json().get("results", []):
                 u = it.get("foreign_landing_url") or it.get("url")
                 if u: out.append(u)
+            _WORKER_CACHE[_ck] = out
             return out
     except Exception as e: print(f"Openverse Error {e}", flush=True)
     return []
@@ -315,14 +357,9 @@ def bot1_image_worker():
     # RESUME: GitHub la Last Category Paaru - Tamil la Irundhu Thirumba Start Aaga Venaam!
     _resume_cat, _resume_n = load_progress()
     idx = 0
-    global START_N
-    START_N = 1
     if _resume_cat and _resume_cat in BASE_CATS:
         idx = BASE_CATS.index(_resume_cat)
         print(f"RESUME: Start Category {_resume_cat} - Idx {idx} - Last N {_resume_n}", flush=True)
-        if _resume_n and _resume_n < 100:
-            START_N = _resume_n + 1
-            print(f"RESUME: Count Resume - {START_N}/100 la Irundhu Thodarum! - 1 la Irundhu Illa!", flush=True)
         # If last category was 100/100 mudinjiduchu - Next category ku Po!
         if _resume_n >= 100:
             idx += 1
@@ -338,7 +375,7 @@ def bot1_image_worker():
             # Openverse - 3 pages = 60 images
             for p in [1,2,3]:
                 pool += fetch_openverse(q, page=p)
-                time.sleep(1)
+                time.sleep(0.3)
             # Wikimedia - 20 images
             pool += fetch_wikimedia(q)
             # Unsplash - backup - 20 slots (same base URL with different query, Telegram will preview)
@@ -363,7 +400,7 @@ def bot1_image_worker():
                     if u not in seen2: seen2.add(u); uniq2.append(u)
                 prompt_cache[prompt_text] = uniq2
                 return uniq2
-            for n in range(START_N, 101):
+            for n in range(1, 101):
                 try:
                     prompt_now, master_now = get_master_prompt(cat, n)
                     pool_now = get_pool_for_prompt(prompt_now)
@@ -378,15 +415,15 @@ def bot1_image_worker():
                     if n % 10 == 0:
                         url = f"https://source.unsplash.com/800x600/?{prompt_now.replace(' ','%20')}"
                         src = "Unsplash"
-                    send_to_channel(f"Auto Image - {cat} - {n}/100 | Master Prompt: {master_now} 📸\nSource: {src} - No Watermark - Made by Aira H1 ❤️\n{url}", BOT1_TOKEN, "Bot1-Image")
-                    save_github(f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {src} - {url}")
+                    send_to_channel(f"Image Katha - {cat} - {n}/100 📸\n\n" + worker_full_paragraph(f"Itha photo {cat} pathi - {master_now}. Source: {src} - No Watermark.", cat) + f"\n\nPhoto Link: {url}", BOT1_TOKEN, "Bot1-Image")
+                    with SAVE_BUFFER_LOCK: SAVE_BUFFER.append((f"images-{cat}-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{cat} - {src} - {url}"))
+                    if len(SAVE_BUFFER) >= BATCH_SIZE: threading.Thread(target=flush_buffer, daemon=True).start()
                     print(f"Bot1 - {cat} - {n}/100 Done!", flush=True)
                     save_progress(cat, n)
-                    time.sleep(2)  # Slow - 2 sec ku 1 image - Spam illa
+                    time.sleep(0.5)  # FAST - 0.5 sec ku 1 image - Telegram Safe - 4x Fast!
                 except Exception as e: print(f"Bot1 100 Error {e}", flush=True); time.sleep(2)
             print(f"Bot1 Done - {cat} - 100/100 - Next Category!", flush=True)
-            START_N = 1  # FIX: Next Category 1 la Irundhu Start Aaganum - 12 la Illa!
-            time.sleep(10)
+            time.sleep(3)
         except Exception as e: print(f"Bot1 Error {e}", flush=True); time.sleep(30)
 
 def bot2_knowledge_worker():
@@ -400,24 +437,24 @@ def bot2_knowledge_worker():
                 if r.status_code==200:
                     ex = r.json().get("extract","")[:600]
                     if ex:
-                        send_to_channel(f"Auto Knowledge - {topic} 🧠\n{ex}", BOT2_TOKEN, "Bot2-Wiki")
-                        save_github(f"knowledge-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {ex}")
+                        send_to_channel(f"Knowledge Katha - {topic} \U0001f9e0\n\n" + worker_full_paragraph(f"{topic} pathi oru unmai - {ex}", topic), BOT2_TOKEN, "Bot2-Wiki")
+                        with SAVE_BUFFER_LOCK: SAVE_BUFFER.append((f"knowledge-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {ex}"))
             except Exception as e: print(f"Wiki Error {e}", flush=True)
             try:
                 r = requests.get("https://openlibrary.org/search.json", params={"q":topic,"limit":5}, timeout=10)
                 for b in r.json().get("docs",[])[:3]:
                     title = b.get("title","")
                     if title:
-                        send_to_channel(f"Auto Book - {topic} - {title} 📚", BOT2_TOKEN, "Bot2-Book")
-                        save_github(f"books-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {title}")
+                        send_to_channel(f"Book Katha - {topic} - {title} \U0001f4da\n\n" + worker_full_paragraph(f"Itha book {title} - {topic} pathi pesuthu.", topic), BOT2_TOKEN, "Bot2-Book")
+                        with SAVE_BUFFER_LOCK: SAVE_BUFFER.append((f"books-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {title}"))
             except Exception as e: print(f"OpenLibrary Error {e}", flush=True)
             try:
                 r = requests.get("https://archive.org/advancedsearch.php", params={"q":f"title:({topic}) AND mediatype:texts","fl[]":"identifier,title","rows":5,"output":"json"}, timeout=15)
                 for d in r.json().get("response",{}).get("docs",[])[:2]:
                     ident = d.get("identifier",""); title = d.get("title","Book")
                     if ident:
-                        send_to_channel(f"Auto Book Archive - {topic} - {title} 📚\nhttps://archive.org/details/{ident}", BOT2_TOKEN, "Bot2-Archive")
-                        save_github(f"books-archive-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {ident} - {title}")
+                        send_to_channel(f"Book Katha Archive - {topic} - {title} \U0001f4da\n\n" + worker_full_paragraph(f"Archive la irukka book {title} - {topic} pathi - Link: https://archive.org/details/{ident}", topic), BOT2_TOKEN, "Bot2-Archive")
+                        with SAVE_BUFFER_LOCK: SAVE_BUFFER.append((f"books-archive-{datetime.now().strftime('%Y-%m-%d')}.txt", f"{topic} - {ident} - {title}"))
             except Exception as e: print(f"Archive Error {e}", flush=True)
             try:
                 r = requests.get("https://opentdb.com/api.php", params={"amount":1,"type":"multiple"}, timeout=10)
@@ -427,12 +464,12 @@ def bot2_knowledge_worker():
                     ques = re.sub(r'<[^>]+>', '', html.unescape(qd.get('question','')))
                     ans = re.sub(r'<[^>]+>', '', html.unescape(qd.get('correct_answer','')))
                     cat2 = re.sub(r'<[^>]+>', '', html.unescape(qd.get('category','')))
-                    msg = f"Auto Quiz - {topic} 🧠\nQ: {ques}\nA: {ans} - {cat2}"
+                    msg = f"Q+A Katha - {topic} \U0001f9e0\n\nQuestion: {ques}\n\nAnswer: {ans} - {cat2}. " + worker_full_paragraph(f"Itha kelvi {topic} pathi - Answer {ans}.", topic)
                     send_to_channel(msg, BOT2_TOKEN, "Bot2-Quiz")
-                    save_github(f"quiz-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", msg)
+                    with SAVE_BUFFER_LOCK: SAVE_BUFFER.append((f"quiz-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", msg))
             except Exception as e: print(f"Quiz Error {e}", flush=True)
             print(f"Bot2 Done - {topic} - Infinite Next!", flush=True)
-            time.sleep(30)
+            time.sleep(10)
         except Exception as e: print(f"Bot2 Error {e}", flush=True); time.sleep(30)
 
 def self_heal():
@@ -440,6 +477,7 @@ def self_heal():
         try:
             time.sleep(60)
             print(f"Self-Heal - Worker - Repo {CURRENT_REPO[0]} - OK", flush=True)
+            flush_buffer()
             save_github(f"heartbeat-worker-{datetime.now().strftime('%Y-%m-%d')}.txt", f"Worker Alive - {datetime.now()} - Repo {CURRENT_REPO[0]}")
         except Exception as e: print(f"Self-Heal Error {e}", flush=True); time.sleep(30)
 
