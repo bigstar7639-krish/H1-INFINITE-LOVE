@@ -133,8 +133,8 @@ def make_infinite_emotion():
 # Copyright Books - Full PDF illa, Summary + Link mattum. Ithu thaan Legal.
 BOOKS_FULL = {
   # Free - Full Download OK - Project Gutenberg / Public Domain
-  "pride and prejudice": {"title":"Pride and Prejudice - Jane Austen","url":"https://www.gutenberg.org/files/1342/1342-8.txt","free":True,"lang":"English"},
-  "bharathiyar": {"title":"Bharathiyar Kavithaigal - Mahakavi Bharathiyar","url":"https://www.gutenberg.org/files/37926/37926-8.txt","free":True,"lang":"Tamil"},
+  "pride and prejudice": {"title":"Pride and Prejudice - Jane Austen","url":"https://www.gutenberg.org/cache/epub/1342/pg1342.txt","free":True,"lang":"English"},
+  "bharathiyar": {"title":"Bharathiyar Kavithaigal - Mahakavi Bharathiyar","url":"https://www.gutenberg.org/cache/epub/37926/pg37926.txt","free":True,"lang":"Tamil"},
   "thirukkural": {"title":"Thirukkural - Thiruvalluvar","url":"https://raw.githubusercontent.com/bigstar7639-krish/H1-INFINITE-LOVE/main/data/thirukkural.txt","free":True,"lang":"Tamil"},
   "alchemist": {"title":"The Alchemist - Paulo Coelho","url":"","free":False,"lang":"English"},
   "harry potter": {"title":"Harry Potter - J.K. Rowling","url":"","free":False,"lang":"English"},
@@ -298,7 +298,7 @@ def get_quote():
 # ===== FULL RANDOM FIX - AI FIRST + GEMINI BACKUP + 429 FIX =====
 def gemini_answer(q):
     for key in GEMINI_KEYS:
-        for model in ["gemini-2.0-flash","gemini-1.5-flash"]:
+        for model in ["gemini-1.5-flash","gemini-1.5-flash-latest","gemini-2.5-flash"]:
             try:
                 r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}", json={"contents":[{"parts":[{"text":f"You are Aira, Tamil Tanglish + All Language, Infinite Knowledge, Friend. Answer in same language user asked. Be warm, friendly, simple, 4-6 lines. User: {q}"}]}]}, timeout=15)
                 if r.status_code==200:
@@ -347,136 +347,6 @@ def ai_answer(q, allow_groq=True):
         if k in words: return random.choice(v)
     # Kelviya paathu oru line answer - reply varama pogathu
     return f"Aira: {q} - Itha paathi naan yosichen! {random.choice(['Unakku puriyura maari solluren - ', 'Kelvi super - ', 'Ithu mukkiyamana vishayam - '])}Ne konjam detail ah ketta, naan full ah explain pannuren! Ne enna paathi kekkura nu sollu - Example: History ah? Science ah? Love ah? 💜"
-
-def calc(text):
-    try:
-        m = re.search(r'(\d+)\s*([\+\-\*/])\s*(\d+)', text)
-        if m:
-            a, op, b = int(m.group(1)), m.group(2), int(m.group(3))
-            if op == "+": return f"Calculator: {a} + {b} = {a+b}"
-            if op == "-": return f"Calculator: {a} - {b} = {a-b}"
-            if op == "*": return f"Calculator: {a} * {b} = {a*b}"
-            if op == "/": return f"Calculator: {a} / {b} = {a/b:.2f}"
-    except: pass
-    return None
-
-def ai_reply(txt, uid=None, uname="Friend"):
-    low = txt.lower().strip()
-    # FIX: "chinna" la "hi" irukku nu thappa nenaikatha - word ah paakanum
-    words = re.findall(r"[a-z\u0b80-\u0bff]+", low)
-    wset = set(words)
-    clean_low = low.replace("aira","").strip()
-    if clean_low in ["me krishna","me krish","naan krishna","naan krish","krishna","krish"]:
-        return f"Hi {uname}! 💜 Ne Thaan En Friend! Aprom enna? Story venuma? Game venuma?"
-    # Hi mattum - thaniya word ah iruntha mattum
-    if low in ["hi","hello","hi aira","hello aira","aira hi","aira hello","hi!","hello!"] or wset & {"vanakkam"} and len(words) <= 3:
-        if uid:
-            mem = get_memory_greeting(uid)
-            if mem: return mem
-        return "Hi! Naan Aira! Enna pannura? Knowledge venuma? Book venuma? Story venuma? Game venuma? Health venuma? 💜"
-    if "namaste" in low: return "Namaste! Main Aira hoon!"
-    if "hola" in low: return "Hola! Soy Aira!"
-    if "bonjour" in low: return "Bonjour! Je suis Aira!"
-    # FULL RANDOM: Kelvi na FIRST AI
-    is_question = ("?" in txt or "enna" in low or "eppadi" in low or "yen" in low or "why" in low or "what" in low or "how" in low or "pathi" in low or "sollu" in low or "yaaru" in low or "ethu" in low or "evlo" in low or "eppo" in low or "enga" in low or "where" in low or "when" in low or "who" in low or "which" in low)
-    if "magic" in low and "book" in low:
-        return ai_answer(txt)
-    if is_question:
-        if low.replace("aira","").strip() in ["book","story","joke","kavithai","thirukkural","pazhamozhi","game","health","movie","song"]:
-            pass
-        else:
-            return ai_answer(txt)
-    # Chinna Command mattum - Random OK
-    if low.replace("aira","").strip() in ["joke","joke sollu"]: return random.choice(JOKES)
-    if low.replace("aira","").strip() in ["book","reading","book sollu"]: return "Reading: " + random.choice(READINGS)
-    if low.replace("aira","").strip() in ["story","kathai","story sollu"]: return "Story: " + make_story(uname)
-    if "kavithai" in low and len(low) < 25: return "Kavithai: " + random.choice(KAVITHAI_T)
-    if "thirukkural" in low and len(low) < 30: return "Thirukkural: " + random.choice(THIRUKKURAL)
-    if "pazhamozhi" in low and len(low) < 30: return "Pazhamozhi: " + random.choice(PAZHAMOZHI)
-    if "game" in low and len(low) < 20: return "Game: " + random.choice(GAMES)
-    if "health" in low and len(low) < 20: return random.choice(HEALTH_TIPS)
-    if "vocab" in low or "word" in low:
-        w, m = random.choice(VOCAB); return f"Vocab: {w} = {m}"
-    if "recipe" in low or "samayal" in low or "biryani" in low or "cake" in low:
-        if is_question: return ai_answer(txt)
-        return "Recipe: " + random.choice(RECIPES)
-    if "business" in low or "idea" in low:
-        if is_question: return ai_answer(txt)
-        return "Business Idea: " + random.choice(BUSINESS_IDEAS)
-    if "movie" in low and len(low) < 20: return "Movie: " + random.choice(MOVIES)
-    if "song" in low and len(low) < 20: return "Song: " + random.choice(SONGS)
-    if "love letter" in low: return f"Love Letter\nAnbe {uname}, Un Sirippu - En Vazhkai! - Aira"
-    if "caption" in low: return f"Caption: {uname} - Smile - Life Azhagu! - Aira"
-    if "compliment" in low: return f"{uname}! Ne Azhagu! Ne Smart! Ne Nalla Manasu! 💜"
-    if "todo" in low or "list" in low:
-        if uid in USER_MEMORY: return f"To-Do List\n{USER_MEMORY[uid]['todo'] if USER_MEMORY[uid]['todo'] else 'List Empty!'}"
-        return "To-Do: `Add - Milk vangnum` nu Sollu!"
-    if low.startswith("add -") or low.startswith("add "):
-        if uid: USER_MEMORY[uid]["todo"].append(txt); return f"To-Do Added - {txt}"
-        return "To-Do Added!"
-    if "note" in low:
-        if uid: USER_MEMORY[uid]["notes"].append(txt); return f"Note Saved - {txt}"
-    if "birthday" in low: return "Birthday: Date Sollu - Aira Nyabagam Vachikum!"
-    if "secret" in low or "diary" in low: return "Secret / Diary Saved - Yaarukkum Kaata Maaten!"
-    if "dream" in low or "kanavu" in low:
-        if is_question: return ai_answer(txt)
-        return "Dream: Kanavu - Un Manasu Sollura Vishayam! Nalla Kanavu - Nalla Naal Varum!"
-    c = calc(txt)
-    if c: return c
-
-    # ===== FULL BOOK COMMANDS =====
-    if "book list" in low or "books list" in low or "book ella" in low:
-        lst = "\n".join([f"- {v['title']} - {'FREE Full Download ✅' if v['free'] else 'Summary Only - Copyright'} " for v in BOOKS_FULL.values()])
-        return f"📚 Aira Book Library - Infinite 💜\n\n{lst}\n\nFull Read venumna: 'Aira, Pride and Prejudice padikattum' nu sollu!"
-    if "download" in low and "book" in low:
-        for k in BOOKS_FULL:
-            if k in low:
-                txt, st = download_book(k)
-                if not txt: return st
-                return f"📚 Download Done! 💜\n{BOOKS_FULL[k]['title']}\nSize: {len(txt)} chars\nIppo padikattuma? 'Aira, {k} padikattum' nu sollu!"
-        return "Yentha book download pannanum? 'Aira, Pride and Prejudice download pannu' nu sollu!"
-    if ("padikattum" in low or "read" in low or "continue" in low or "padu" in low) and any(k in low for k in BOOKS_FULL):
-        for k in BOOKS_FULL:
-            if k in low: return read_book_infinite(k)
-    if "book" in low and ("?" in txt or "enna" in low or "yen" in low or "eppadi" in low or "who" in low or "what" in low or "why" in low):
-        # Book Q&A - Book la irunthu answer
-        for k in BOOKS_FULL:
-            if k in low: return answer_from_book(txt, k)
-        return "Yentha book pathi kekkura? 'Aira, Harry Potter la magic enna?' nu sollu!"
-    # User emotion sonna - Infinite emotion la irunthu reply
-    for _emo in INFINITE_EMOTIONS:
-        if _emo in low:
-            _e, _m = make_infinite_emotion()
-            # User sonna emotion ah vechu reply - Infinite
-            return f"{_m} - Unakku {_emo} ah irukka? Sollu, kekuren! 💜"
-    # "Aira oru chinna ponnu" maathiri sentence - AI kitta poganum, Hi greeting illa
-    return ai_answer(txt)
-
-def calc(text):
-    try:
-        m = re.search(r'(\d+)\s*([\+\-\*/])\s*(\d+)', text)
-        if m:
-            a, op, b = int(m.group(1)), m.group(2), int(m.group(3))
-            if op == "+": return f"Calculator: {a} + {b} = {a+b}"
-            if op == "-": return f"Calculator: {a} - {b} = {a-b}"
-            if op == "*": return f"Calculator: {a} * {b} = {a*b}"
-            if op == "/": return f"Calculator: {a} / {b} = {a/b:.2f}"
-    except: pass
-    return None
-
-def ai_reply(txt):
-    low = txt.lower()
-    # FIX: "hi" nu paatha pothathu - "chinna" la kooda "hi" irukku! Adhan thappu reply vanthuchu
-    # Word ah paakanum - "hi" thaniya iruntha mattum Hi
-    words = re.findall(r"[a-z\u0b80-\u0bff]+", low)
-    wset = set(words)
-    if wset & {"namaste"}: return "Namaste! Main Aira hoon! Kaise ho? Kya chahiye? ❤️"
-    if wset & {"hola"}: return "Hola! Soy Aira! Como estas? ❤️"
-    if wset & {"bonjour"}: return "Bonjour! Je suis Aira! ❤️"
-    if wset & {"hi","hello","hey","vanakkam","hai"}: return "Hi 💘! Naan Aira! Enna pannura? Sollu - Kadhal ah? Career ah? Joke venuma? Story venuma? 😊💜"
-    if "joke" in low: return random.choice(JOKES)
-    if "book" in low: return "Book - Channel la varum! 📚"
-    return None
 
 def calc(text):
     try:
